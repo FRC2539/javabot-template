@@ -21,9 +21,6 @@ public class Robot extends TimesliceRobot {
 
         // Prevents the logging of many errors with our controllers
         DriverStation.silenceJoystickConnectionWarning(true);
-
-        // Send as little data as possible with live window
-        LiveWindow.disableAllTelemetry();
     }
 
     @Override
