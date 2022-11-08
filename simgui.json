@@ -3,5 +3,15 @@
     "types": {
       "/FMSInfo": "FMSInfo"
     }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "Autonomous": {
+        "open": true
+      },
+      "Swerve": {
+        "open": true
+      }
+    }
   }
 }
