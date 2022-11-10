@@ -13,6 +13,13 @@ import frc.lib.control.SwerveDriveSignal;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+// TrajectoryFollowCommand
+// [
+//      Marker - Spinup
+//      Stop Point shoot\
+// ]
+// Path group
+
 public class TrajectoryFollower {
     private HolonomicDriveController driveController;
 
