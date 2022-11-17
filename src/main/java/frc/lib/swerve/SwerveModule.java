@@ -1,21 +1,21 @@
-package frc.robot;
+package frc.lib.swerve;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.math.Conversions;
-import frc.lib.swerve.CTREModuleState;
-import frc.lib.swerve.SwerveModuleConstants;
+import frc.robot.Constants;
+import frc.robot.Robot;
 
 public class SwerveModule {
     public int moduleNumber;
     private double angleOffset;
-    private TalonFX mAngleMotor;
-    private TalonFX mDriveMotor;
+    private WPI_TalonFX mAngleMotor;
+    private WPI_TalonFX mDriveMotor;
     private CANCoder angleEncoder;
     private double lastAngle;
     private boolean inverted;
@@ -37,14 +37,14 @@ public class SwerveModule {
 
         /* Angle Motor Config */
         mAngleMotor = moduleConstants.canivoreName.isEmpty()
-                ? new TalonFX(moduleConstants.angleMotorID)
-                : new TalonFX(moduleConstants.angleMotorID, moduleConstants.canivoreName.get());
+                ? new WPI_TalonFX(moduleConstants.angleMotorID)
+                : new WPI_TalonFX(moduleConstants.angleMotorID, moduleConstants.canivoreName.get());
         configAngleMotor();
 
         /* Drive Motor Config */
         mDriveMotor = moduleConstants.canivoreName.isEmpty()
-                ? new TalonFX(moduleConstants.driveMotorID)
-                : new TalonFX(moduleConstants.driveMotorID, moduleConstants.canivoreName.get());
+                ? new WPI_TalonFX(moduleConstants.driveMotorID)
+                : new WPI_TalonFX(moduleConstants.driveMotorID, moduleConstants.canivoreName.get());
         configDriveMotor();
 
         lastAngle = getState().angle.getDegrees();

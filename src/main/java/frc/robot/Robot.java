@@ -2,11 +2,9 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimesliceRobot;
-import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.loops.UpdateManager;
 import frc.robot.Constants.TimesliceConstants;
-import frc.robot.subsystems.LimelightSubsystem.LimelightPipeline;
 
 public class Robot extends TimesliceRobot {
     public static CTREConfigs ctreConfigs = new CTREConfigs();
@@ -30,9 +28,6 @@ public class Robot extends TimesliceRobot {
 
     private void scheduleUpdateFunctions() {
         updateManager.schedule(robotContainer.getSwerveDriveSubsystem(), TimesliceConstants.DRIVETRAIN_PERIOD);
-        updateManager.schedule(robotContainer.getLimelightSubsystem(), TimesliceConstants.LIMELIGHT_PERIOD);
-        updateManager.schedule(robotContainer.getShooterSubsystem(), TimesliceConstants.SHOOTER_PERIOD);
-        updateManager.schedule(robotContainer.getBalltrackSubsystem(), TimesliceConstants.BALLTRACK_PERIOD);
     }
 
     @Override
@@ -43,7 +38,6 @@ public class Robot extends TimesliceRobot {
     @Override
     public void autonomousInit() {
         robotContainer.getAutonomousCommand().schedule();
-        robotContainer.getLimelightSubsystem().stopUpdatingPoseUsingLimelight();
     }
 
     @Override
@@ -51,8 +45,6 @@ public class Robot extends TimesliceRobot {
 
     @Override
     public void teleopInit() {
-        robotContainer.getLimelightSubsystem().setPipeline(LimelightPipeline.SHOOT);
-        robotContainer.getLimelightSubsystem().startUpdatingPoseUsingLimelight();
     }
 
     @Override
@@ -60,7 +52,6 @@ public class Robot extends TimesliceRobot {
 
     @Override
     public void disabledInit() {
-        robotContainer.getLimelightSubsystem().setPipeline(LimelightPipeline.SHOOT);
     }
 
     @Override

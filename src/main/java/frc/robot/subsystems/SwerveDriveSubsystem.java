@@ -12,25 +12,21 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.estimator.SwerveDrivePoseEstimator;
 import frc.lib.control.MovingAverageVelocity;
 import frc.lib.control.SwerveDriveSignal;
 import frc.lib.loops.Updatable;
+import frc.lib.swerve.SwerveModule;
 import frc.robot.Constants;
-import frc.robot.Constants.GlobalConstants;
 import frc.robot.Constants.TimesliceConstants;
-import frc.robot.SwerveModule;
-import frc.robot.util.LoggingManager;
 import frc.robot.util.TrajectoryFollower;
 import java.util.Optional;
 
 /**
  * SwerveDriveSubsystem
  */
-public class SwerveDriveSubsystem extends ShootingComponentSubsystem implements Updatable {
+public class SwerveDriveSubsystem extends NetworkTablesSubsystem implements Updatable {
     public final PIDController autoXController = new PIDController(1, 0, 0, TimesliceConstants.CONTROLLER_PERIOD);
     public final PIDController autoYController = new PIDController(1, 0, 0, TimesliceConstants.CONTROLLER_PERIOD);
     public final ProfiledPIDController autoThetaController = new ProfiledPIDController(
@@ -44,7 +40,7 @@ public class SwerveDriveSubsystem extends ShootingComponentSubsystem implements 
     private final TrajectoryFollower follower =
             new TrajectoryFollower(autoXController, autoYController, autoThetaController);
 
-    private frc.robot.SwerveModule[] modules;
+    private frc.lib.swerve.SwerveModule[] modules;
 
     private final AHRS gyro = new AHRS();
 
@@ -63,35 +59,6 @@ public class SwerveDriveSubsystem extends ShootingComponentSubsystem implements 
     private ChassisSpeeds velocity = new ChassisSpeeds();
     private SwerveDriveSignal driveSignal = null;
 
-    private final boolean LOG_TRAJECTORY_INFO = false;
-
-    private NetworkTableEntry stationaryEntry;
-
-    private NetworkTableEntry robotPoseEntry;
-
-    private NetworkTableEntry enableGhostPose;
-    private NetworkTableEntry ghostPoseEntry;
-
-    private NetworkTableEntry calculatedDistanceEntry;
-
-    private NetworkTableEntry trajectoryXEntry;
-    private NetworkTableEntry trajectoryYEntry;
-    private NetworkTableEntry trajectoryAngleEntry;
-
-    private NetworkTableEntry driveTemperaturesEntry;
-    private NetworkTableEntry steerTemperaturesEntry;
-
-    private NetworkTableEntry vx;
-    private NetworkTableEntry vy;
-
-    private DoubleArrayLogEntry driveTemperaturesLogEntry;
-    private DoubleArrayLogEntry steerTemperaturesLogEntry;
-
-    private Timer loggingTimer = new Timer();
-
-    private static double TEMPERATURE_LOGGING_PERIOD = 5; // seconds
-    private boolean TEMPERATURE_LOGGING_ENABLED = true;
-
     public SwerveDriveSubsystem() {
         super("Swerve");
 
@@ -107,59 +74,10 @@ public class SwerveDriveSubsystem extends ShootingComponentSubsystem implements 
             module.resetToAbsolute();
         }
 
-        stationaryEntry = getEntry("stationary");
-
-        robotPoseEntry = getEntry("robotPose");
-
-        enableGhostPose = getEntry("enableGhostPose");
-        enableGhostPose.setBoolean(false);
-        ghostPoseEntry = getEntry("ghostPose");
-
-        trajectoryXEntry = getEntry("Trajectory X");
-        trajectoryYEntry = getEntry("Trajectory Y");
-        trajectoryAngleEntry = getEntry("Trajectory Angle");
-
-        calculatedDistanceEntry = getEntry("Swerve Based Target Distance");
-
-        driveTemperaturesEntry = getEntry("Drive Temperatures");
-        steerTemperaturesEntry = getEntry("Steer Temperatures");
-
-        vx = getEntry("vx");
-        vy = getEntry("vy");
-
-        vx.setDouble(0);
-        vy.setDouble(0);
-
-        startLoggingTemperatures();
 
         // Flip the initial pose estimate to match the practice pose estimate to the post-auto pose estimate
         resetGyroAngle(new Rotation2d());
         resetPose(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(180)));
-    }
-
-    public void startLoggingTemperatures() {
-        // Log motor temperatures only when not simulated
-        if (TEMPERATURE_LOGGING_ENABLED && LoggingManager.getLog().isPresent()) {
-            driveTemperaturesLogEntry =
-                    new DoubleArrayLogEntry(LoggingManager.getLog().get(), "/temps/drive");
-            steerTemperaturesLogEntry =
-                    new DoubleArrayLogEntry(LoggingManager.getLog().get(), "/temps/steer");
-
-            loggingTimer.start();
-        }
-    }
-
-    public void enableLoggingTemperatures() {
-        TEMPERATURE_LOGGING_ENABLED = true;
-
-        startLoggingTemperatures();
-    }
-
-    public boolean isStationary() {
-        return driveSignal != null
-                && Math.abs(driveSignal.vxMetersPerSecond) < 0.15
-                && Math.abs(driveSignal.vyMetersPerSecond) < 0.15
-                && Math.abs(driveSignal.omegaRadiansPerSecond) < 0.15;
     }
 
     public SwerveDrivePoseEstimator getPoseEstimator() {
@@ -263,9 +181,6 @@ public class SwerveDriveSubsystem extends ShootingComponentSubsystem implements 
                     driveSignal.vxMetersPerSecond, driveSignal.vyMetersPerSecond, driveSignal.omegaRadiansPerSecond);
         }
 
-        vx.setDouble(chassisVelocity.vxMetersPerSecond);
-        vy.setDouble(chassisVelocity.vyMetersPerSecond);
-
         SwerveModuleState[] moduleStates =
                 Constants.SwerveConstants.swerveKinematics.toSwerveModuleStates(chassisVelocity);
 
@@ -278,19 +193,6 @@ public class SwerveDriveSubsystem extends ShootingComponentSubsystem implements 
         for (SwerveModule module : modules) {
             module.setDesiredState(desiredStates[module.moduleNumber], true);
         }
-    }
-
-    public void setGhostPosition(Pose2d ghostPosition) {
-        setGhostPositionState(true);
-        ghostPoseEntry.setDoubleArray(new double[] {
-            ghostPosition.getX(),
-            ghostPosition.getY(),
-            ghostPosition.getRotation().getDegrees()
-        });
-    }
-
-    public void setGhostPositionState(boolean ghostPositionState) {
-        enableGhostPose.setBoolean(ghostPositionState);
     }
 
     @Override
@@ -318,40 +220,7 @@ public class SwerveDriveSubsystem extends ShootingComponentSubsystem implements 
 
     @Override
     public void periodic() {
-        Pose2d pose = getPose();
 
-        stationaryEntry.setBoolean(isStationary());
-
-        calculatedDistanceEntry.setDouble(getPose().getTranslation().getDistance(GlobalConstants.goalLocation));
-
-        robotPoseEntry.setDoubleArray(
-                new double[] {pose.getX(), pose.getY(), getGyroRotation2d().getDegrees()});
-
-        if (LOG_TRAJECTORY_INFO) {
-            if (follower.getLastState() == null) {
-                trajectoryXEntry.setDouble(0);
-                trajectoryYEntry.setDouble(0);
-                trajectoryAngleEntry.setDouble(0);
-            } else {
-                Pose2d trajectoryPose = getFollower().getLastState().poseMeters;
-
-                trajectoryXEntry.setDouble(trajectoryPose.getX());
-                trajectoryYEntry.setDouble(trajectoryPose.getY());
-                trajectoryAngleEntry.setDouble(trajectoryPose.getRotation().getDegrees());
-            }
-        }
-
-        // Log the motor temperatures periodically
-        if (loggingTimer.advanceIfElapsed(TEMPERATURE_LOGGING_PERIOD)) {
-            double[] driveTemperatures = getDriveTemperatures();
-            double[] steerTemperatures = getSteerTemperatures();
-
-            driveTemperaturesEntry.setDoubleArray(driveTemperatures);
-            steerTemperaturesEntry.setDoubleArray(steerTemperatures);
-
-            driveTemperaturesLogEntry.append(driveTemperatures);
-            steerTemperaturesLogEntry.append(steerTemperatures);
-        }
     }
 
     public TrajectoryFollower getFollower() {
