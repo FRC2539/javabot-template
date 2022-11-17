@@ -3,12 +3,14 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.TimesliceRobot;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.controller.Axis;
 import frc.lib.controller.ThrustmasterJoystick;
+import frc.lib.loops.UpdateManager;
 import frc.robot.Constants.ControllerConstants;
+import frc.robot.Constants.TimesliceConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.robot.util.AutonomousManager;
@@ -24,17 +26,16 @@ public class RobotContainer {
 
     private AutonomousManager autonomousManager;
     private TrajectoryLoader trajectoryLoader;
+    private UpdateManager updateManager;
 
-    public RobotContainer() {
+    public RobotContainer(TimesliceRobot robot) {
         trajectoryLoader = new TrajectoryLoader();
-
+        updateManager = new UpdateManager(robot);
         autonomousManager = new AutonomousManager(trajectoryLoader, this);
 
-        CommandScheduler.getInstance().registerSubsystem(swerveDriveSubsystem);
+        updateManager.schedule(swerveDriveSubsystem, TimesliceConstants.DRIVETRAIN_PERIOD);
 
-        CommandScheduler.getInstance()
-                .setDefaultCommand(
-                        swerveDriveSubsystem,
+        swerveDriveSubsystem.setDefaultCommand(
                         new DriveCommand(
                                 swerveDriveSubsystem,
                                 getDriveForwardAxis(),
@@ -55,6 +56,9 @@ public class RobotContainer {
                 .onTrue(new InstantCommand(() -> swerveDriveSubsystem.resetPose(new Pose2d(
                         new Translation2d(),
                         swerveDriveSubsystem.getGyroRotation2d().rotateBy(Rotation2d.fromDegrees(180))))));
+
+        rightDriveController.sendButtonNamesToNT();
+        leftDriveController.sendButtonNamesToNT();
     }
 
     public Command getAutonomousCommand() {

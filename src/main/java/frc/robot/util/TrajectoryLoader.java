@@ -1,5 +1,6 @@
 package frc.robot.util;
 
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
 public class TrajectoryLoader {
@@ -18,91 +19,95 @@ public class TrajectoryLoader {
     private static final String TWO_BALL_STEAL_PATH = "twoball far steal";
     private static final String ONE_BALL_STEAL_PATH = "oneball far steal";
 
-    private LazyPathPlannerTrajectory threeBall;
-    private LazyPathPlannerTrajectory threeBall2;
-    private LazyPathPlannerTrajectory twoBall;
-    private LazyPathPlannerTrajectory twoBallFar;
-    private LazyPathPlannerTrajectory twoBallFarManualGyro;
-    private LazyPathPlannerTrajectory fourBall;
-    private LazyPathPlannerTrajectory fourBall2;
-    private LazyPathPlannerTrajectory fourBall3;
-    private LazyPathPlannerTrajectory fiveBall;
-    private LazyPathPlannerTrajectory fiveBall1;
-    private LazyPathPlannerTrajectory fiveBallSweep;
-    private LazyPathPlannerTrajectory fiveBall2;
-    private LazyPathPlannerTrajectory twoBallSteal;
-    private LazyPathPlannerTrajectory oneBallSteal;
+    private PathPlannerTrajectory threeBall;
+    private PathPlannerTrajectory threeBall2;
+    private PathPlannerTrajectory twoBall;
+    private PathPlannerTrajectory twoBallFar;
+    private PathPlannerTrajectory twoBallFarManualGyro;
+    private PathPlannerTrajectory fourBall;
+    private PathPlannerTrajectory fourBall2;
+    private PathPlannerTrajectory fourBall3;
+    private PathPlannerTrajectory fiveBall;
+    private PathPlannerTrajectory fiveBall1;
+    private PathPlannerTrajectory fiveBallSweep;
+    private PathPlannerTrajectory fiveBall2;
+    private PathPlannerTrajectory twoBallSteal;
+    private PathPlannerTrajectory oneBallSteal;
 
     public TrajectoryLoader() {
-        threeBall = new LazyPathPlannerTrajectory(THREE_BALL_PATH, 5, 6.0);
-        threeBall2 = new LazyPathPlannerTrajectory(THREE_BALL_2_PATH, 5, 2.5);
-        // twoBall = new LazyPathPlannerTrajectory(TWO_BALL_PATH, 5, 2.0);
-        twoBallFar = new LazyPathPlannerTrajectory(THREE_BALL_PATH, 5, 4.0);
-        // twoBallFarManualGyro = new LazyPathPlannerTrajectory(TWO_BALL_FAR_MANUAL_GYRO_PATH, 5, 2.5);
-        // fiveBall = new LazyPathPlannerTrajectory(FIVE_BALL_PATH, 5, 2.5);
-        fourBall = new LazyPathPlannerTrajectory(FOUR_BALL_PATH, 5, 2.5);
-        fourBall2 = new LazyPathPlannerTrajectory(FOUR_BALL_2_PATH, 5, 6.0);
-        fourBall3 = new LazyPathPlannerTrajectory(FOUR_BALL_3_PATH, 5, 6.0);
-        fiveBall1 = new LazyPathPlannerTrajectory(FIVE_BALL_1_PATH, 5, 5.5);
-        fiveBallSweep = new LazyPathPlannerTrajectory(FIVE_BALL_SWEEP_PATH, 2.5, 3.5);
-        fiveBall2 = new LazyPathPlannerTrajectory(FIVE_BALL_2_PATH, 5, 6.0);
-        // twoBallSteal = new LazyPathPlannerTrajectory(TWO_BALL_STEAL_PATH, 5, 2.5);
-        // oneBallSteal = new LazyPathPlannerTrajectory(ONE_BALL_STEAL_PATH, 5, 2.5);
+        threeBall = loadTrajectory(THREE_BALL_PATH, 5, 6.0);
+        threeBall2 = loadTrajectory(THREE_BALL_2_PATH, 5, 2.5);
+        // twoBall = loadTrajectory(TWO_BALL_PATH, 5, 2.0);
+        twoBallFar = loadTrajectory(THREE_BALL_PATH, 5, 4.0);
+        // twoBallFarManualGyro = loadTrajectory(TWO_BALL_FAR_MANUAL_GYRO_PATH, 5, 2.5);
+        // fiveBall = loadTrajectory(FIVE_BALL_PATH, 5, 2.5);
+        fourBall = loadTrajectory(FOUR_BALL_PATH, 5, 2.5);
+        fourBall2 = loadTrajectory(FOUR_BALL_2_PATH, 5, 6.0);
+        fourBall3 = loadTrajectory(FOUR_BALL_3_PATH, 5, 6.0);
+        fiveBall1 = loadTrajectory(FIVE_BALL_1_PATH, 5, 5.5);
+        fiveBallSweep = loadTrajectory(FIVE_BALL_SWEEP_PATH, 2.5, 3.5);
+        fiveBall2 = loadTrajectory(FIVE_BALL_2_PATH, 5, 6.0);
+        // twoBallSteal = loadTrajectory(TWO_BALL_STEAL_PATH, 5, 2.5);
+        // oneBallSteal = loadTrajectory(ONE_BALL_STEAL_PATH, 5, 2.5);
+    }
+
+    private PathPlannerTrajectory loadTrajectory(String path, double maxVel, double maxAccel) {
+        return PathPlanner.loadPath(path, maxVel, maxAccel);
     }
 
     public PathPlannerTrajectory getThreeBall() {
-        return threeBall.getTrajectory();
+        return threeBall;
     }
 
     public PathPlannerTrajectory getThreeBall2() {
-        return threeBall2.getTrajectory();
+        return threeBall2;
     }
 
     public PathPlannerTrajectory getTwoBall() {
-        return twoBall.getTrajectory();
+        return twoBall;
     }
 
     public PathPlannerTrajectory getTwoBallFar() {
-        return twoBallFar.getTrajectory();
+        return twoBallFar;
     }
 
     public PathPlannerTrajectory getTwoBallFarManualGyro() {
-        return twoBallFarManualGyro.getTrajectory();
+        return twoBallFarManualGyro;
     }
 
     public PathPlannerTrajectory getFiveBall() {
-        return fiveBall.getTrajectory();
+        return fiveBall;
     }
 
     public PathPlannerTrajectory getFiveBall1() {
-        return fiveBall1.getTrajectory();
+        return fiveBall1;
     }
 
     public PathPlannerTrajectory getFiveBallSweep() {
-        return fiveBallSweep.getTrajectory();
+        return fiveBallSweep;
     }
 
     public PathPlannerTrajectory getFiveBall2() {
-        return fiveBall2.getTrajectory();
+        return fiveBall2;
     }
 
     public PathPlannerTrajectory getFourBall() {
-        return fourBall.getTrajectory();
+        return fourBall;
     }
 
     public PathPlannerTrajectory getFourBall2() {
-        return fourBall2.getTrajectory();
+        return fourBall2;
     }
 
     public PathPlannerTrajectory getFourBall3() {
-        return fourBall3.getTrajectory();
+        return fourBall3;
     }
 
     public PathPlannerTrajectory getTwoBallSteal() {
-        return twoBallSteal.getTrajectory();
+        return twoBallSteal;
     }
 
     public PathPlannerTrajectory getOneBallSteal() {
-        return oneBallSteal.getTrajectory();
+        return oneBallSteal;
     }
 }

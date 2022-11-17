@@ -2,8 +2,9 @@ package frc.lib.controller;
 
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 import java.util.HashMap;
 
 public class CustomXboxController {
@@ -52,6 +53,8 @@ public class CustomXboxController {
         rightTrigger = new JoystickAxis(joystick, 3);
         rightXAxis = new JoystickAxis(joystick, 4);
         rightYAxis = new JoystickAxis(joystick, 5);
+
+        buttonPurposeHashMap.put("type", "CustomXboxController");
     }
 
     public Trigger getButtonA() {

@@ -12,6 +12,19 @@ public final class Constants {
         public static final double targetVoltage = 12.0; // Used for voltage compensation
     }
 
+    public static final class ControllerConstants {
+        public static final int LEFT_DRIVE_CONTROLLER = 0;
+        public static final int RIGHT_DRIVE_CONTROLLER = 1;
+        public static final int OPERATOR_CONTROLLER = 2;
+    }
+
+    public static final class TimesliceConstants {
+        public static final double ROBOT_PERIODIC_ALLOCATION = 0.004;
+        public static final double CONTROLLER_PERIOD = 0.010;
+
+        public static final double DRIVETRAIN_PERIOD = 0.0025;
+    }
+
     public static final class SwerveConstants extends Mk4SwerveConstants {}
 
     public static class Mk4SwerveConstants {
@@ -230,19 +243,5 @@ public final class Constants {
             public static final SwerveModuleConstants constants =
                     new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, canivoreName);
         }
-    }
-
-
-    public static final class ControllerConstants {
-        public static final int LEFT_DRIVE_CONTROLLER = 0;
-        public static final int RIGHT_DRIVE_CONTROLLER = 1;
-        public static final int OPERATOR_CONTROLLER = 2;
-    }
-
-    public static final class TimesliceConstants {
-        public static final double ROBOT_PERIODIC_ALLOCATION = 0.002;
-        public static final double CONTROLLER_PERIOD = 0.005;
-
-        public static final double DRIVETRAIN_PERIOD = 0.0015;
     }
 }
