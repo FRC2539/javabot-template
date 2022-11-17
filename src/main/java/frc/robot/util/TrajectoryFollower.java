@@ -7,29 +7,21 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.control.SwerveDriveSignal;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-// TrajectoryFollowCommand
-// [
-//      Marker - Spinup
-//      Stop Point shoot\
-// ]
-// Path group
-
 public class TrajectoryFollower {
     private HolonomicDriveController driveController;
 
-    private Trajectory currentTrajectory = null;
+    private PathPlannerTrajectory currentTrajectory = null;
 
     private Supplier<Rotation2d> desiredRotation = null;
 
     private boolean isPathPlanner = false;
 
-    private Trajectory.State lastState = null;
+    private PathPlannerTrajectory.PathPlannerState lastState = null;
 
     private double startTime = Double.NaN;
 
@@ -73,13 +65,13 @@ public class TrajectoryFollower {
     }
 
     private SwerveDriveSignal calculateDriveSignal(
-            Pose2d currentPose, Trajectory trajectory, Supplier<Rotation2d> desiredRotation, double timeSinceStart) {
+            Pose2d currentPose, PathPlannerTrajectory trajectory, Supplier<Rotation2d> desiredRotation, double timeSinceStart) {
         if (timeSinceStart > trajectory.getTotalTimeSeconds()) {
             finished = true;
             return new SwerveDriveSignal();
         }
 
-        lastState = trajectory.sample(timeSinceStart);
+        lastState = (PathPlannerState) trajectory.sample(timeSinceStart);
 
         return new SwerveDriveSignal(driveController.calculate(currentPose, lastState, desiredRotation.get()), false);
     }
@@ -91,10 +83,10 @@ public class TrajectoryFollower {
             return new SwerveDriveSignal();
         }
 
-        lastState = trajectory.sample(timeSinceStart);
+        lastState = (PathPlannerState) trajectory.sample(timeSinceStart);
 
         return new SwerveDriveSignal(
-                driveController.calculate(currentPose, lastState, ((PathPlannerState) lastState).holonomicRotation),
+                driveController.calculate(currentPose, lastState, lastState.holonomicRotation),
                 false);
     }
 
@@ -102,7 +94,7 @@ public class TrajectoryFollower {
         return isPathPlanner;
     }
 
-    public Trajectory.State getLastState() {
+    public PathPlannerTrajectory.State getLastState() {
         return lastState;
     }
 
@@ -118,7 +110,7 @@ public class TrajectoryFollower {
         currentTrajectory = null;
     }
 
-    public void follow(Trajectory trajectory, Supplier<Rotation2d> desiredRotation) {
+    public void follow(PathPlannerTrajectory trajectory, Supplier<Rotation2d> desiredRotation) {
         currentTrajectory = trajectory;
         this.desiredRotation = desiredRotation;
         startTime = Double.NaN;
@@ -131,7 +123,7 @@ public class TrajectoryFollower {
         isPathPlanner = true;
     }
 
-    public Optional<Trajectory> getCurrentTrajectory() {
+    public Optional<PathPlannerTrajectory> getCurrentTrajectory() {
         return Optional.ofNullable(currentTrajectory);
     }
 }

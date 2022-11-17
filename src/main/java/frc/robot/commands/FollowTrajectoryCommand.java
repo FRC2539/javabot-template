@@ -2,19 +2,18 @@ package frc.robot.commands;
 
 import com.pathplanner.lib.PathPlannerTrajectory;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import java.util.function.Supplier;
 
 public class FollowTrajectoryCommand extends CommandBase {
     private SwerveDriveSubsystem swerveDriveSubsystem;
-    private Trajectory trajectory;
+    private PathPlannerTrajectory trajectory;
     private Supplier<Rotation2d> desiredRotation;
     private boolean isPathPlanner;
 
     public FollowTrajectoryCommand(
-            SwerveDriveSubsystem swerveDriveSubsystem, Trajectory trajectory, Supplier<Rotation2d> desiredRotation) {
+            SwerveDriveSubsystem swerveDriveSubsystem, PathPlannerTrajectory trajectory, Supplier<Rotation2d> desiredRotation) {
         this.swerveDriveSubsystem = swerveDriveSubsystem;
         this.trajectory = trajectory;
         this.desiredRotation = desiredRotation;
@@ -23,15 +22,7 @@ public class FollowTrajectoryCommand extends CommandBase {
 
         addRequirements(swerveDriveSubsystem);
     }
-
-    public FollowTrajectoryCommand(SwerveDriveSubsystem swerveDriveSubsystem, Trajectory trajectory) {
-        this(swerveDriveSubsystem, trajectory, () -> trajectory
-                .getStates()
-                .get(trajectory.getStates().size() - 1)
-                .poseMeters
-                .getRotation());
-    }
-
+    
     public FollowTrajectoryCommand(SwerveDriveSubsystem swerveDriveSubsystem, PathPlannerTrajectory trajectory) {
         this.swerveDriveSubsystem = swerveDriveSubsystem;
         this.trajectory = trajectory;
@@ -44,7 +35,7 @@ public class FollowTrajectoryCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        if (isPathPlanner) swerveDriveSubsystem.getFollower().follow((PathPlannerTrajectory) trajectory);
+        if (isPathPlanner) swerveDriveSubsystem.getFollower().follow(trajectory);
         else swerveDriveSubsystem.getFollower().follow(trajectory, desiredRotation);
     }
 
