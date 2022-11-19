@@ -15,6 +15,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.estimator.SwerveDrivePoseEstimator;
@@ -65,6 +67,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     private NetworkTable table;
     private DoubleArrayPublisher posePublisher;
+    private DoubleArrayLogEntry poseLogger = new DoubleArrayLogEntry(DataLogManager.getLog(), "Pose");
 
     public SwerveDriveSubsystem() {
         table = NetworkTableInstance.getDefault().getTable(getName());
@@ -228,10 +231,17 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     @Override
     public void periodic() {
-        posePublisher.set(new double[]{
+        double[] poseArray = poseToDoubleArray(pose);
+
+        posePublisher.set(poseArray);
+        poseLogger.append(poseArray);
+    }
+
+    private double[] poseToDoubleArray(Pose2d pose) {
+        return new double[]{
             pose.getX(), 
             pose.getY(), 
-            pose.getRotation().getRadians()});
+            pose.getRotation().getRadians()};
     }
 
     public TrajectoryFollower getFollower() {
