@@ -12,7 +12,11 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.DoubleArrayPublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.estimator.SwerveDrivePoseEstimator;
 import frc.lib.control.MovingAverageVelocity;
 import frc.lib.control.SwerveDriveSignal;
@@ -26,7 +30,7 @@ import java.util.Optional;
 /**
  * SwerveDriveSubsystem
  */
-public class SwerveDriveSubsystem extends NetworkTablesSubsystem implements Updatable {
+public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     public final PIDController autoXController = new PIDController(1, 0, 0, TimesliceConstants.CONTROLLER_PERIOD);
     public final PIDController autoYController = new PIDController(1, 0, 0, TimesliceConstants.CONTROLLER_PERIOD);
     public final ProfiledPIDController autoThetaController = new ProfiledPIDController(
@@ -39,10 +43,6 @@ public class SwerveDriveSubsystem extends NetworkTablesSubsystem implements Upda
 
     private final TrajectoryFollower follower =
             new TrajectoryFollower(autoXController, autoYController, autoThetaController);
-
-    private frc.lib.swerve.SwerveModule[] modules;
-
-    private final AHRS gyro = new AHRS();
 
     private final SwerveDrivePoseEstimator swervePoseEstimator = new SwerveDrivePoseEstimator(
             new Rotation2d(),
@@ -59,8 +59,16 @@ public class SwerveDriveSubsystem extends NetworkTablesSubsystem implements Upda
     private ChassisSpeeds velocity = new ChassisSpeeds();
     private SwerveDriveSignal driveSignal = null;
 
+    private SwerveModule[] modules;
+
+    private final AHRS gyro = new AHRS();
+
+    private NetworkTable table;
+    private DoubleArrayPublisher posePublisher;
+
     public SwerveDriveSubsystem() {
-        super("Swerve");
+        table = NetworkTableInstance.getDefault().getTable(getName());
+        posePublisher = table.getDoubleArrayTopic("Pose").publish();
 
         modules = new SwerveModule[] {
             new SwerveModule(0, Constants.SwerveConstants.Mod0.constants),
@@ -220,7 +228,10 @@ public class SwerveDriveSubsystem extends NetworkTablesSubsystem implements Upda
 
     @Override
     public void periodic() {
-
+        posePublisher.set(new double[]{
+            pose.getX(), 
+            pose.getY(), 
+            pose.getRotation().getRadians()});
     }
 
     public TrajectoryFollower getFollower() {

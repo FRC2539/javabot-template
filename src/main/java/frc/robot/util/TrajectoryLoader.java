@@ -37,7 +37,7 @@ public class TrajectoryLoader {
     public TrajectoryLoader() {
         threeBall = loadTrajectory(THREE_BALL_PATH, 5, 6.0);
         threeBall2 = loadTrajectory(THREE_BALL_2_PATH, 5, 2.5);
-        // twoBall = loadTrajectory(TWO_BALL_PATH, 5, 2.0);
+        twoBall = loadTrajectory(TWO_BALL_PATH, 5, 2.0);
         twoBallFar = loadTrajectory(THREE_BALL_PATH, 5, 4.0);
         // twoBallFarManualGyro = loadTrajectory(TWO_BALL_FAR_MANUAL_GYRO_PATH, 5, 2.5);
         // fiveBall = loadTrajectory(FIVE_BALL_PATH, 5, 2.5);

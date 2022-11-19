@@ -20,7 +20,7 @@ public class AutonomousManager {
     private NetworkTableEntry selectedAuto;
 
     private final String[] autoStrings = {
-        "haha"
+        "demo"
     };
 
     public AutonomousManager(TrajectoryLoader trajectoryLoader, RobotContainer container) {
@@ -39,6 +39,16 @@ public class AutonomousManager {
         selectedAuto.setString(autoStrings[0]);
     }
 
+    public Command getDemo() {
+        SequentialCommandGroup command = new SequentialCommandGroup();
+
+        resetRobotPose(command, trajectoryLoader.getTwoBall());
+
+        follow(command, trajectoryLoader.getTwoBall());
+
+        return command;
+    }
+
     private void follow(SequentialCommandGroup command, PathPlannerTrajectory trajectory) {
         command.addCommands(new FollowTrajectoryCommand(container.getSwerveDriveSubsystem(), trajectory));
     }
@@ -55,7 +65,8 @@ public class AutonomousManager {
 
     public Command loadAutonomousCommand() {
         switch (selectedAuto.getString(autoStrings[0])) {
-            
+            case "demo":
+                return getDemo();
         }
 
         // Return an empty command group if no auto is specified
