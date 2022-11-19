@@ -7,6 +7,7 @@ import com.ctre.phoenix.sensors.WPI_CANCoder;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.math.Conversions;
 import frc.robot.Constants;
@@ -123,6 +124,16 @@ public class SwerveModule {
         Rotation2d angle = Rotation2d.fromDegrees(Conversions.falconToDegrees(
                 angleMotor.getSelectedSensorPosition(), Constants.SwerveConstants.angleGearRatio));
         return new SwerveModuleState(velocity, angle);
+    }
+
+    public SwerveModulePosition getPosition() {
+        double encoder = Conversions.falconToMPS(
+            driveMotor.getSelectedSensorPosition(),
+            Constants.SwerveConstants.wheelCircumference,
+            Constants.SwerveConstants.driveGearRatio);
+        Rotation2d angle = Rotation2d.fromDegrees(Conversions.falconToDegrees(
+                angleMotor.getSelectedSensorPosition(), Constants.SwerveConstants.angleGearRatio));
+        return new SwerveModulePosition(encoder, angle);
     }
 
     public double getDriveTemperature() {

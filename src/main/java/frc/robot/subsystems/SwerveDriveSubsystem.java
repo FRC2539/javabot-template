@@ -1,6 +1,8 @@
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
+
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -9,7 +11,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
@@ -17,7 +22,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import frc.lib.control.MovingAverageVelocity;
 import frc.lib.control.SwerveDriveSignal;
 import frc.lib.loops.Updatable;
@@ -44,14 +49,17 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     private final TrajectoryFollower follower =
             new TrajectoryFollower(autoXController, autoYController, autoThetaController);
 
-    private final SwerveDrivePoseEstimator swervePoseEstimator = new SwerveDrivePoseEstimator(
+    private final SwerveDrivePoseEstimator<N3,N3,N1> swervePoseEstimator = new SwerveDrivePoseEstimator<N3,N3,N1>(
+            Nat.N3(),
+            Nat.N3(),
+            Nat.N1(),
             new Rotation2d(),
+            getModulePositions(),
             new Pose2d(),
             Constants.SwerveConstants.swerveKinematics,
             VecBuilder.fill(0.01, 0.01, Units.degreesToRadians(0.01)),
             VecBuilder.fill(Units.degreesToRadians(0.01)),
-            VecBuilder.fill(0.025, 0.025, Units.degreesToRadians(0.025)),
-            TimesliceConstants.CONTROLLER_PERIOD);
+            VecBuilder.fill(0.025, 0.025, Units.degreesToRadians(0.025)));
 
     private final MovingAverageVelocity velocityEstimator = new MovingAverageVelocity(50);
 
@@ -88,7 +96,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
         resetPose(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(180)));
     }
 
-    public SwerveDrivePoseEstimator getPoseEstimator() {
+    public SwerveDrivePoseEstimator<N3,N3,N1> getPoseEstimator() {
         return swervePoseEstimator;
     }
 
@@ -126,7 +134,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     public void resetPose(Pose2d pose) {
         this.pose = pose;
-        swervePoseEstimator.resetPosition(pose, getGyroRotation2d());
+        swervePoseEstimator.resetPosition(getGyroRotation2d(), getModulePositions(), pose);
     }
 
     public void resetGyroAngle(Rotation2d angle) {
@@ -158,12 +166,13 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     private void updateOdometry() {
         SwerveModuleState[] moduleStates = getModuleStates();
+        SwerveModulePosition[] modulePositions = getModulePositions();
 
         velocity = Constants.SwerveConstants.swerveKinematics.toChassisSpeeds(moduleStates);
 
         velocityEstimator.add(velocity);
 
-        pose = swervePoseEstimator.updateWithTime(Timer.getFPGATimestamp(), getGyroRotation2d(), moduleStates);
+        pose = swervePoseEstimator.updateWithTime(Timer.getFPGATimestamp(), getGyroRotation2d(), moduleStates, modulePositions);
     }
 
     public SwerveModuleState[] getModuleStates() {
@@ -172,6 +181,14 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
             states[module.moduleNumber] = module.getState();
         }
         return states;
+    }
+
+    public SwerveModulePosition[] getModulePositions() {
+        SwerveModulePosition[] positions = new SwerveModulePosition[4];
+        for(SwerveModule module : modules) {
+            positions[module.moduleNumber] = module.getPosition();
+        }
+        return positions;
     }
 
     private void updateModules(SwerveDriveSignal driveSignal) {
