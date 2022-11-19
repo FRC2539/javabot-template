@@ -42,9 +42,14 @@ public class AutonomousManager {
     public Command getDemo() {
         SequentialCommandGroup command = new SequentialCommandGroup();
 
-        resetRobotPose(command, trajectoryLoader.getTwoBall());
+        resetRobotPose(command, trajectoryLoader.getThreeBall());
 
-        follow(command, trajectoryLoader.getTwoBall());
+        follow(command, trajectoryLoader.getThreeBall());
+        follow(command, trajectoryLoader.getThreeBall2());
+
+        follow(command, trajectoryLoader.getFiveBall1());
+        follow(command, trajectoryLoader.getFiveBallSweep());
+        follow(command, trajectoryLoader.getFiveBall2());
 
         return command;
     }
