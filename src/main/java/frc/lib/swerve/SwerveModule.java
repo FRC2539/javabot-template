@@ -4,7 +4,6 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.WPI_CANCoder;
-
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -128,9 +127,9 @@ public class SwerveModule {
 
     public SwerveModulePosition getPosition() {
         double encoder = Conversions.falconToMPS(
-            driveMotor.getSelectedSensorPosition(),
-            Constants.SwerveConstants.wheelCircumference,
-            Constants.SwerveConstants.driveGearRatio);
+                driveMotor.getSelectedSensorPosition(),
+                Constants.SwerveConstants.wheelCircumference,
+                Constants.SwerveConstants.driveGearRatio);
         Rotation2d angle = Rotation2d.fromDegrees(Conversions.falconToDegrees(
                 angleMotor.getSelectedSensorPosition(), Constants.SwerveConstants.angleGearRatio));
         return new SwerveModulePosition(encoder, angle);

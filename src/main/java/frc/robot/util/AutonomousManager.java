@@ -19,9 +19,7 @@ public class AutonomousManager {
 
     private NetworkTableEntry selectedAuto;
 
-    private final String[] autoStrings = {
-        "demo"
-    };
+    private final String[] autoStrings = {"demo"};
 
     public AutonomousManager(TrajectoryLoader trajectoryLoader, RobotContainer container) {
         this.trajectoryLoader = trajectoryLoader;

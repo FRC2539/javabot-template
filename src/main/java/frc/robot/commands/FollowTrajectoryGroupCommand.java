@@ -2,7 +2,6 @@ package frc.robot.commands;
 
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPlannerTrajectory.EventMarker;
-
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -30,7 +29,13 @@ public class FollowTrajectoryGroupCommand extends CommandBase {
         StoppedInitialize,
         Finished
     }
-    public FollowTrajectoryGroupCommand(SwerveDriveSubsystem swerveDriveSubsystem, ArrayList<PathPlannerTrajectory> trajectories, ArrayList<Command> simultaneousCommands, ArrayList<Command> stopPointCommands, HashMap<String, Command> markerCommands) {
+
+    public FollowTrajectoryGroupCommand(
+            SwerveDriveSubsystem swerveDriveSubsystem,
+            ArrayList<PathPlannerTrajectory> trajectories,
+            ArrayList<Command> simultaneousCommands,
+            ArrayList<Command> stopPointCommands,
+            HashMap<String, Command> markerCommands) {
         this.swerveDriveSubsystem = swerveDriveSubsystem;
         this.trajectories = trajectories;
         this.simultaneousCommands = simultaneousCommands;
@@ -53,56 +58,56 @@ public class FollowTrajectoryGroupCommand extends CommandBase {
     public void execute() {
         switch (state) {
             case StoppedInitialize:
-                //checks if there are any stop point commmands left to execute
+                // checks if there are any stop point commmands left to execute
                 if (stopPointCommands.size() > 0) {
-                    //if so, schedules it and goes to stopped exe
+                    // if so, schedules it and goes to stopped exe
                     stopPointCommand = stopPointCommands.remove(0);
                     stopPointCommand.schedule();
                     state = State.StoppedExecute;
                 } else {
-                    //else skips to the path following phase
+                    // else skips to the path following phase
                     state = State.MovingInitialize;
                 }
                 break;
             case StoppedExecute:
-                //if the stop point command is finished, it goes to the path following phase
+                // if the stop point command is finished, it goes to the path following phase
                 if (stopPointCommand.isFinished()) {
                     state = State.MovingInitialize;
                 }
                 break;
             case MovingInitialize:
                 unpassedMarkers = new ArrayList<>();
-                //checks if there are any remaining trajectories to follow
-                if(trajectories.size() > 0) {
-                    //if so, records all of the markers
+                // checks if there are any remaining trajectories to follow
+                if (trajectories.size() > 0) {
+                    // if so, records all of the markers
                     unpassedMarkers.addAll(trajectories.get(0).getMarkers());
 
-                    //follows the trajectory
+                    // follows the trajectory
                     swerveDriveSubsystem.getFollower().follow(trajectories.remove(0));
-                    
-                    //if there are remaining simultaneous commands to go with the trajectories, it schedules them with it, otherwise it just substitutes
-                    //in an instant command and goes to the MovingExecute
-                    if (simultaneousCommands.size() > 0)
-                        simultaneousCommand = simultaneousCommands.remove(0);
-                    else
-                        simultaneousCommand = new InstantCommand();
-                        
+
+                    // if there are remaining simultaneous commands to go with the trajectories, it schedules them with
+                    // it, otherwise it just substitutes
+                    // in an instant command and goes to the MovingExecute
+                    if (simultaneousCommands.size() > 0) simultaneousCommand = simultaneousCommands.remove(0);
+                    else simultaneousCommand = new InstantCommand();
+
                     simultaneousCommand.schedule();
                     timer.reset();
 
                     state = State.MovingExecute;
                 } else {
-                    //else, finishes cuz there is nothing left to do.
+                    // else, finishes cuz there is nothing left to do.
                     state = State.Finished;
                 }
                 break;
             case MovingExecute:
-                //if a marker has had it's time pass, it runs the command associated with it
-                if(unpassedMarkers.size() > 0 && timer.get() >= unpassedMarkers.get(0).timeSeconds) {
+                // if a marker has had it's time pass, it runs the command associated with it
+                if (unpassedMarkers.size() > 0 && timer.get() >= unpassedMarkers.get(0).timeSeconds) {
                     markerCommands.get(unpassedMarkers.remove(0).name).schedule();
                 }
 
-                //if the trajectory is finished being followed, it stops following the trajectory, ends the simultaneousCommand, and sets the state to start stopping
+                // if the trajectory is finished being followed, it stops following the trajectory, ends the
+                // simultaneousCommand, and sets the state to start stopping
                 if (swerveDriveSubsystem.getFollower().getCurrentTrajectory().isEmpty()) {
                     simultaneousCommand.end(true);
                     swerveDriveSubsystem.getFollower().cancel();
@@ -111,7 +116,6 @@ public class FollowTrajectoryGroupCommand extends CommandBase {
                 break;
             case Finished:
                 break;
-                
         }
     }
 

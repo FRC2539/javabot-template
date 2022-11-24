@@ -11,11 +11,7 @@ public class DriveCommand extends CommandBase {
     private Axis strafe;
     private Axis rotation;
 
-    public DriveCommand(
-            SwerveDriveSubsystem drivetrain,
-            Axis forward,
-            Axis strafe,
-            Axis rotation) {
+    public DriveCommand(SwerveDriveSubsystem drivetrain, Axis forward, Axis strafe, Axis rotation) {
         this.forward = forward;
         this.strafe = strafe;
         this.rotation = rotation;

@@ -65,7 +65,10 @@ public class TrajectoryFollower {
     }
 
     private SwerveDriveSignal calculateDriveSignal(
-            Pose2d currentPose, PathPlannerTrajectory trajectory, Supplier<Rotation2d> desiredRotation, double timeSinceStart) {
+            Pose2d currentPose,
+            PathPlannerTrajectory trajectory,
+            Supplier<Rotation2d> desiredRotation,
+            double timeSinceStart) {
         if (timeSinceStart > trajectory.getTotalTimeSeconds()) {
             finished = true;
             return new SwerveDriveSignal();
@@ -86,8 +89,7 @@ public class TrajectoryFollower {
         lastState = (PathPlannerState) trajectory.sample(timeSinceStart);
 
         return new SwerveDriveSignal(
-                driveController.calculate(currentPose, lastState, lastState.holonomicRotation),
-                false);
+                driveController.calculate(currentPose, lastState, lastState.holonomicRotation), false);
     }
 
     public boolean isPathPlanner() {

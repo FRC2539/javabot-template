@@ -35,12 +35,8 @@ public class RobotContainer {
 
         updateManager.schedule(swerveDriveSubsystem, TimesliceConstants.DRIVETRAIN_PERIOD);
 
-        swerveDriveSubsystem.setDefaultCommand(
-                        new DriveCommand(
-                                swerveDriveSubsystem,
-                                getDriveForwardAxis(),
-                                getDriveStrafeAxis(),
-                                getDriveRotationAxis()));
+        swerveDriveSubsystem.setDefaultCommand(new DriveCommand(
+                swerveDriveSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
 
         configureControllerLayout();
     }

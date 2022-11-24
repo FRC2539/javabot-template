@@ -42,15 +42,13 @@ public class Robot extends TimesliceRobot {
     public void autonomousPeriodic() {}
 
     @Override
-    public void teleopInit() {
-    }
+    public void teleopInit() {}
 
     @Override
     public void teleopPeriodic() {}
 
     @Override
-    public void disabledInit() {
-    }
+    public void disabledInit() {}
 
     @Override
     public void testInit() {}

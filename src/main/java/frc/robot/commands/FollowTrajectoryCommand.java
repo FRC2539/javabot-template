@@ -13,7 +13,9 @@ public class FollowTrajectoryCommand extends CommandBase {
     private boolean isPathPlanner;
 
     public FollowTrajectoryCommand(
-            SwerveDriveSubsystem swerveDriveSubsystem, PathPlannerTrajectory trajectory, Supplier<Rotation2d> desiredRotation) {
+            SwerveDriveSubsystem swerveDriveSubsystem,
+            PathPlannerTrajectory trajectory,
+            Supplier<Rotation2d> desiredRotation) {
         this.swerveDriveSubsystem = swerveDriveSubsystem;
         this.trajectory = trajectory;
         this.desiredRotation = desiredRotation;
@@ -22,7 +24,7 @@ public class FollowTrajectoryCommand extends CommandBase {
 
         addRequirements(swerveDriveSubsystem);
     }
-    
+
     public FollowTrajectoryCommand(SwerveDriveSubsystem swerveDriveSubsystem, PathPlannerTrajectory trajectory) {
         this.swerveDriveSubsystem = swerveDriveSubsystem;
         this.trajectory = trajectory;

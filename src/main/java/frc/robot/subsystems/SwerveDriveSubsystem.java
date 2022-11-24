@@ -1,11 +1,11 @@
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
-
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -23,7 +23,6 @@ import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import frc.lib.control.MovingAverageVelocity;
 import frc.lib.control.SwerveDriveSignal;
 import frc.lib.loops.Updatable;
@@ -50,7 +49,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     private final TrajectoryFollower follower =
             new TrajectoryFollower(autoXController, autoYController, autoThetaController);
 
-    private final SwerveDrivePoseEstimator<N7,N7,N5> swervePoseEstimator;
+    private final SwerveDrivePoseEstimator<N7, N7, N5> swervePoseEstimator;
 
     private final MovingAverageVelocity velocityEstimator = new MovingAverageVelocity(50);
 
@@ -83,24 +82,24 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
         }
 
         // Initialize the swerve drive pose estimator with access to the module positions.
-        swervePoseEstimator = new SwerveDrivePoseEstimator<N7,N7,N5>(
-            Nat.N7(),
-            Nat.N7(),
-            Nat.N5(),
-            new Rotation2d(),
-            getModulePositions(),
-            new Pose2d(),
-            Constants.SwerveConstants.swerveKinematics,
-            VecBuilder.fill(0.01, 0.01, Units.degreesToRadians(0.01), 0.01, 0.01, 0.01, 0.01),
-            VecBuilder.fill(Units.degreesToRadians(0.01), 0.01, 0.01, 0.01, 0.01),
-            VecBuilder.fill( 0.025, 0.025, Units.degreesToRadians(0.025)));
+        swervePoseEstimator = new SwerveDrivePoseEstimator<N7, N7, N5>(
+                Nat.N7(),
+                Nat.N7(),
+                Nat.N5(),
+                new Rotation2d(),
+                getModulePositions(),
+                new Pose2d(),
+                Constants.SwerveConstants.swerveKinematics,
+                VecBuilder.fill(0.01, 0.01, Units.degreesToRadians(0.01), 0.01, 0.01, 0.01, 0.01),
+                VecBuilder.fill(Units.degreesToRadians(0.01), 0.01, 0.01, 0.01, 0.01),
+                VecBuilder.fill(0.025, 0.025, Units.degreesToRadians(0.025)));
 
         // Flip the initial pose estimate to match the practice pose estimate to the post-auto pose estimate
         resetGyroAngle(new Rotation2d());
         resetPose(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(180)));
     }
 
-    public SwerveDrivePoseEstimator<N7,N7,N5> getPoseEstimator() {
+    public SwerveDrivePoseEstimator<N7, N7, N5> getPoseEstimator() {
         return swervePoseEstimator;
     }
 
@@ -176,7 +175,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
         velocityEstimator.add(velocity);
 
-        pose = swervePoseEstimator.updateWithTime(Timer.getFPGATimestamp(), getGyroRotation2d(), moduleStates, modulePositions);
+        pose = swervePoseEstimator.updateWithTime(
+                Timer.getFPGATimestamp(), getGyroRotation2d(), moduleStates, modulePositions);
     }
 
     public SwerveModuleState[] getModuleStates() {
@@ -189,7 +189,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     public SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
-        for(SwerveModule module : modules) {
+        for (SwerveModule module : modules) {
             positions[module.moduleNumber] = module.getPosition();
         }
         return positions;
@@ -256,10 +256,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     }
 
     private double[] poseToDoubleArray(Pose2d pose) {
-        return new double[]{
-            pose.getX(), 
-            pose.getY(), 
-            pose.getRotation().getRadians()};
+        return new double[] {pose.getX(), pose.getY(), pose.getRotation().getRadians()};
     }
 
     public TrajectoryFollower getFollower() {
