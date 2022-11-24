@@ -13,8 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
@@ -51,17 +50,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     private final TrajectoryFollower follower =
             new TrajectoryFollower(autoXController, autoYController, autoThetaController);
 
-    private final SwerveDrivePoseEstimator<N3,N3,N1> swervePoseEstimator = new SwerveDrivePoseEstimator<N3,N3,N1>(
-            Nat.N3(),
-            Nat.N3(),
-            Nat.N1(),
-            new Rotation2d(),
-            getModulePositions(),
-            new Pose2d(),
-            Constants.SwerveConstants.swerveKinematics,
-            VecBuilder.fill(0.01, 0.01, Units.degreesToRadians(0.01)),
-            VecBuilder.fill(Units.degreesToRadians(0.01)),
-            VecBuilder.fill(0.025, 0.025, Units.degreesToRadians(0.025)));
+    private final SwerveDrivePoseEstimator<N7,N7,N5> swervePoseEstimator;
 
     private final MovingAverageVelocity velocityEstimator = new MovingAverageVelocity(50);
 
@@ -93,13 +82,25 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
             module.resetToAbsolute();
         }
 
+        // Initialize the swerve drive pose estimator with access to the module positions.
+        swervePoseEstimator = new SwerveDrivePoseEstimator<N7,N7,N5>(
+            Nat.N7(),
+            Nat.N7(),
+            Nat.N5(),
+            new Rotation2d(),
+            getModulePositions(),
+            new Pose2d(),
+            Constants.SwerveConstants.swerveKinematics,
+            VecBuilder.fill(0.01, 0.01, Units.degreesToRadians(0.01), 0.01, 0.01, 0.01, 0.01),
+            VecBuilder.fill(Units.degreesToRadians(0.01), 0.01, 0.01, 0.01, 0.01),
+            VecBuilder.fill( 0.025, 0.025, Units.degreesToRadians(0.025)));
 
         // Flip the initial pose estimate to match the practice pose estimate to the post-auto pose estimate
         resetGyroAngle(new Rotation2d());
         resetPose(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(180)));
     }
 
-    public SwerveDrivePoseEstimator<N3,N3,N1> getPoseEstimator() {
+    public SwerveDrivePoseEstimator<N7,N7,N5> getPoseEstimator() {
         return swervePoseEstimator;
     }
 
