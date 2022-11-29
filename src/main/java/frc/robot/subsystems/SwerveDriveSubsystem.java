@@ -116,6 +116,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
         return pose.getRotation();
     }
 
+    public void drive(ChassisSpeeds velocity) {
+        drive(velocity, false);
+    }
+
     public void drive(ChassisSpeeds velocity, boolean isFieldOriented) {
         driveSignal = new SwerveDriveSignal(velocity, isFieldOriented);
     }
