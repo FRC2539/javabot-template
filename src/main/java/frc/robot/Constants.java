@@ -3,6 +3,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.util.Units;
 import frc.lib.swerve.SwerveModuleConstants;
 
 public final class Constants {
@@ -141,13 +142,13 @@ public final class Constants {
 
         public static final double trackWidth = 0.5969;
         public static final double wheelBase = 0.5969;
-        public static final double wheelDiameter = 0.10033;
+        public static final double wheelDiameter = Units.inchesToMeters(4.0);
         public static final double wheelCircumference = wheelDiameter * Math.PI;
 
         public static final double openLoopRamp = 0.0; // 0.25
         public static final double closedLoopRamp = 0.0;
 
-        public static final double driveGearRatio = (6.75 / 1.0); // 6.75:1
+        public static final double driveGearRatio = (6.86 / 1.0); // 6.86:1
         public static final double angleGearRatio = (12.8 / 1.0); // 12.8:1
 
         public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
