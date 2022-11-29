@@ -8,7 +8,6 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -30,7 +29,6 @@ import frc.lib.swerve.SwerveModule;
 import frc.robot.Constants;
 import frc.robot.Constants.TimesliceConstants;
 import frc.robot.util.TrajectoryFollower;
-import java.util.Optional;
 
 /**
  * SwerveDriveSubsystem
@@ -95,8 +93,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
                 VecBuilder.fill(0.025, 0.025, Units.degreesToRadians(0.025)));
 
         // Flip the initial pose estimate to match the practice pose estimate to the post-auto pose estimate
-        setRotation(new Rotation2d());
-        setPose(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(180)));
+        setRotation(Rotation2d.fromDegrees(180));
     }
 
     public SwerveDrivePoseEstimator<N7, N7, N5> getPoseEstimator() {
@@ -133,7 +130,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     }
 
     public void setRotation(Rotation2d angle) {
-        swervePoseEstimator.resetPosition(gyro.getRotation2d(), getModulePositions(), new Pose2d(getPose().getX(), getPose().getY(), angle));
+        setPose(new Pose2d(getPose().getX(), getPose().getY(), angle));
     }
 
     public void zeroRotation() {
@@ -195,7 +192,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
                     driveSignal.vxMetersPerSecond,
                     driveSignal.vyMetersPerSecond,
                     driveSignal.omegaRadiansPerSecond,
-                    gyro.getRotation2d());
+                    getRotation());
         } else {
             chassisVelocity = new ChassisSpeeds(
                     driveSignal.vxMetersPerSecond, driveSignal.vyMetersPerSecond, driveSignal.omegaRadiansPerSecond);
@@ -218,22 +215,6 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     @Override
     public void update() {
         updateOdometry();
-
-        SwerveDriveSignal driveSignal;
-
-        Optional<SwerveDriveSignal> trajectorySignal = follower.update(getPose());
-
-        if (trajectorySignal.isPresent()) {
-            driveSignal = trajectorySignal.get();
-
-            driveSignal = new SwerveDriveSignal(
-                    driveSignal.vxMetersPerSecond,
-                    driveSignal.vyMetersPerSecond,
-                    driveSignal.omegaRadiansPerSecond,
-                    false);
-        } else {
-            driveSignal = this.driveSignal;
-        }
 
         updateModules(driveSignal);
     }

@@ -17,8 +17,6 @@ public class TrajectoryFollower {
 
     private PathPlannerTrajectory currentTrajectory = null;
 
-    private Supplier<Rotation2d> desiredRotation = null;
-
     private boolean isPathPlanner = false;
 
     private PathPlannerTrajectory.PathPlannerState lastState = null;
@@ -47,36 +45,14 @@ public class TrajectoryFollower {
             reset();
         } else if (isFinished()) {
             currentTrajectory = null;
-            this.desiredRotation = null;
             return Optional.empty();
         }
 
         timeSinceStart = Timer.getFPGATimestamp() - startTime;
 
-        SwerveDriveSignal signal;
-
-        if (isPathPlanner) {
-            signal = calculateDriveSignal(currentPose, (PathPlannerTrajectory) currentTrajectory, timeSinceStart);
-        } else {
-            signal = calculateDriveSignal(currentPose, currentTrajectory, desiredRotation, timeSinceStart);
-        }
+        SwerveDriveSignal signal = calculateDriveSignal(currentPose, currentTrajectory, timeSinceStart);;
 
         return Optional.of(signal);
-    }
-
-    private SwerveDriveSignal calculateDriveSignal(
-            Pose2d currentPose,
-            PathPlannerTrajectory trajectory,
-            Supplier<Rotation2d> desiredRotation,
-            double timeSinceStart) {
-        if (timeSinceStart > trajectory.getTotalTimeSeconds()) {
-            finished = true;
-            return new SwerveDriveSignal();
-        }
-
-        lastState = (PathPlannerState) trajectory.sample(timeSinceStart);
-
-        return new SwerveDriveSignal(driveController.calculate(currentPose, lastState, desiredRotation.get()), false);
     }
 
     private SwerveDriveSignal calculateDriveSignal(
@@ -114,7 +90,6 @@ public class TrajectoryFollower {
 
     public void follow(PathPlannerTrajectory trajectory, Supplier<Rotation2d> desiredRotation) {
         currentTrajectory = trajectory;
-        this.desiredRotation = desiredRotation;
         startTime = Double.NaN;
         isPathPlanner = false;
     }
