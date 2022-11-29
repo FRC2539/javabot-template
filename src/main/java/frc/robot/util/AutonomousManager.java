@@ -61,9 +61,9 @@ public class AutonomousManager {
 
         command.addCommands(new InstantCommand(() -> container
                 .getSwerveDriveSubsystem()
-                .resetGyroAngle(initialState.holonomicRotation.times(-1)))); // might need to reverse this angle
+                .setRotation(initialState.holonomicRotation.times(-1)))); // might need to reverse this angle
         command.addCommands(
-                new InstantCommand(() -> container.getSwerveDriveSubsystem().resetPose(initialState.poseMeters)));
+                new InstantCommand(() -> container.getSwerveDriveSubsystem().setPose(initialState.poseMeters)));
     }
 
     public Command loadAutonomousCommand() {

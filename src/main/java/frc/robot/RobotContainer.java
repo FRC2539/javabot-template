@@ -46,12 +46,12 @@ public class RobotContainer {
         leftDriveController.getYAxis().setScale(Constants.SwerveConstants.maxSpeed);
         rightDriveController.getXAxis().setScale(Constants.SwerveConstants.maxAngularVelocity);
 
-        leftDriveController.getLeftTopLeft().onTrue(new InstantCommand(() -> swerveDriveSubsystem.resetGyroAngle()));
+        leftDriveController.getLeftTopLeft().onTrue(new InstantCommand(() -> swerveDriveSubsystem.zeroRotation()));
         leftDriveController
                 .getLeftTopRight()
-                .onTrue(new InstantCommand(() -> swerveDriveSubsystem.resetPose(new Pose2d(
+                .onTrue(new InstantCommand(() -> swerveDriveSubsystem.setPose(new Pose2d(
                         new Translation2d(),
-                        swerveDriveSubsystem.getGyroRotation2d().rotateBy(Rotation2d.fromDegrees(180))))));
+                        swerveDriveSubsystem.getRotation().rotateBy(Rotation2d.fromDegrees(180))))));
 
         rightDriveController.sendButtonNamesToNT();
         leftDriveController.sendButtonNamesToNT();

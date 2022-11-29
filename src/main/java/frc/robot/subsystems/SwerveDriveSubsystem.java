@@ -95,8 +95,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
                 VecBuilder.fill(0.025, 0.025, Units.degreesToRadians(0.025)));
 
         // Flip the initial pose estimate to match the practice pose estimate to the post-auto pose estimate
-        resetGyroAngle(new Rotation2d());
-        resetPose(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(180)));
+        setRotation(new Rotation2d());
+        setPose(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(180)));
     }
 
     public SwerveDrivePoseEstimator<N7, N7, N5> getPoseEstimator() {
@@ -115,16 +115,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
         return velocityEstimator.getAverage();
     }
 
-    public Rotation2d getGyroRotation2d() {
-        return gyro.getRotation2d();
-    }
-
-    public double getGyroAngle() {
-        return gyro.getAngle() % 360;
-    }
-
-    public double getRawGyroAngle() {
-        return gyro.getAngle();
+    public Rotation2d getRotation() {
+        return pose.getRotation();
     }
 
     public void drive(ChassisSpeeds velocity, boolean isFieldOriented) {
@@ -135,18 +127,17 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
         driveSignal = new SwerveDriveSignal();
     }
 
-    public void resetPose(Pose2d pose) {
+    public void setPose(Pose2d pose) {
         this.pose = pose;
-        swervePoseEstimator.resetPosition(getGyroRotation2d(), getModulePositions(), pose);
+        swervePoseEstimator.resetPosition(gyro.getRotation2d(), getModulePositions(), pose);
     }
 
-    public void resetGyroAngle(Rotation2d angle) {
-        gyro.reset();
-        gyro.setAngleAdjustment(angle.getDegrees());
+    public void setRotation(Rotation2d angle) {
+        swervePoseEstimator.resetPosition(gyro.getRotation2d(), getModulePositions(), new Pose2d(getPose().getX(), getPose().getY(), angle));
     }
 
-    public void resetGyroAngle() {
-        resetGyroAngle(new Rotation2d());
+    public void zeroRotation() {
+        setRotation(new Rotation2d());
     }
 
     public double[] getDriveTemperatures() {
@@ -176,7 +167,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
         velocityEstimator.add(velocity);
 
         pose = swervePoseEstimator.updateWithTime(
-                Timer.getFPGATimestamp(), getGyroRotation2d(), moduleStates, modulePositions);
+                Timer.getFPGATimestamp(), gyro.getRotation2d(), moduleStates, modulePositions);
     }
 
     public SwerveModuleState[] getModuleStates() {
@@ -204,7 +195,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
                     driveSignal.vxMetersPerSecond,
                     driveSignal.vyMetersPerSecond,
                     driveSignal.omegaRadiansPerSecond,
-                    getGyroRotation2d());
+                    gyro.getRotation2d());
         } else {
             chassisVelocity = new ChassisSpeeds(
                     driveSignal.vxMetersPerSecond, driveSignal.vyMetersPerSecond, driveSignal.omegaRadiansPerSecond);
