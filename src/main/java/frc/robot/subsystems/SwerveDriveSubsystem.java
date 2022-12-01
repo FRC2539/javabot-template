@@ -49,11 +49,11 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     private final SwerveDrivePoseEstimator<N7, N7, N5> swervePoseEstimator;
 
-    private final MovingAverageVelocity velocityEstimator = new MovingAverageVelocity(50);
+    private final MovingAverageVelocity velocityEstimator = new MovingAverageVelocity(20);
 
     private Pose2d pose = new Pose2d();
     private ChassisSpeeds velocity = new ChassisSpeeds();
-    private SwerveDriveSignal driveSignal = null;
+    private SwerveDriveSignal driveSignal = new SwerveDriveSignal();
 
     private SwerveModule[] modules;
 
@@ -189,9 +189,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     private void updateModules(SwerveDriveSignal driveSignal) {
         ChassisSpeeds chassisVelocity;
-        if (driveSignal == null) {
-            chassisVelocity = new ChassisSpeeds();
-        } else if (driveSignal.isFieldOriented()) {
+        
+        if (driveSignal.isFieldOriented()) {
             chassisVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(
                     driveSignal.vxMetersPerSecond,
                     driveSignal.vyMetersPerSecond,
