@@ -29,6 +29,7 @@ import frc.lib.swerve.SwerveModule;
 import frc.robot.Constants;
 import frc.robot.Constants.TimesliceConstants;
 import frc.robot.util.TrajectoryFollower;
+import frc.lib.logging.LoggableDoubleArray;
 
 /**
  * SwerveDriveSubsystem
@@ -226,8 +227,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     public void periodic() {
         double[] poseArray = poseToDoubleArray(pose);
 
-        posePublisher.set(poseArray);
-        poseLogger.append(poseArray);
+        LoggableDoubleArray loggablePoseArray = new LoggableDoubleArray(posePublisher, poseLogger, poseArray);
+        loggablePoseArray.logAndPublishPoses(poseArray);
     }
 
     private double[] poseToDoubleArray(Pose2d pose) {
