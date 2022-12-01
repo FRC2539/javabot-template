@@ -50,7 +50,8 @@ public class TrajectoryFollower {
 
         timeSinceStart = Timer.getFPGATimestamp() - startTime;
 
-        SwerveDriveSignal signal = calculateDriveSignal(currentPose, currentTrajectory, timeSinceStart);;
+        SwerveDriveSignal signal = calculateDriveSignal(currentPose, currentTrajectory, timeSinceStart);
+        ;
 
         return Optional.of(signal);
     }

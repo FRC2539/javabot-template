@@ -24,12 +24,12 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.control.MovingAverageVelocity;
 import frc.lib.control.SwerveDriveSignal;
+import frc.lib.logging.LoggableDoubleArray;
 import frc.lib.loops.Updatable;
 import frc.lib.swerve.SwerveModule;
 import frc.robot.Constants;
 import frc.robot.Constants.TimesliceConstants;
 import frc.robot.util.TrajectoryFollower;
-import frc.lib.logging.LoggableDoubleArray;
 
 /**
  * SwerveDriveSubsystem
@@ -63,6 +63,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     private NetworkTable table;
     private DoubleArrayPublisher posePublisher;
     private DoubleArrayLogEntry poseLogger = new DoubleArrayLogEntry(DataLogManager.getLog(), "Pose");
+
+    //NOTE: This is a workaround because Pathplanner has not yet released their newest build of their thingy.
+    //Should be changed eventually and the code relating to it should be updated.
+    public boolean isTakingModuleStatesNotChassisSpeeds = false;
 
     public SwerveDriveSubsystem() {
         table = NetworkTableInstance.getDefault().getTable(getName());
@@ -190,7 +194,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     private void updateModules(SwerveDriveSignal driveSignal) {
         ChassisSpeeds chassisVelocity;
-        
+
         if (driveSignal.isFieldOriented()) {
             chassisVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(
                     driveSignal.vxMetersPerSecond,
@@ -220,7 +224,9 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     public void update() {
         updateOdometry();
 
-        updateModules(driveSignal);
+        if (!isTakingModuleStatesNotChassisSpeeds) {
+            updateModules(driveSignal);
+        }
     }
 
     @Override

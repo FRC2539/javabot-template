@@ -1,7 +1,7 @@
 package frc.lib.logging;
 
-import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
+import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 
 public class LoggableDoubleArray {
     DoubleArrayPublisher posePublisher;

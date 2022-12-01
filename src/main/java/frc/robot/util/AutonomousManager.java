@@ -1,15 +1,23 @@
 package frc.robot.util;
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
+import com.pathplanner.lib.auto.PIDConstants;
+import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.FollowTrajectoryCommand;
+import frc.robot.subsystems.SwerveDriveSubsystem;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AutonomousManager {
     private TrajectoryLoader trajectoryLoader;
@@ -20,6 +28,10 @@ public class AutonomousManager {
     private NetworkTableEntry selectedAuto;
 
     private final String[] autoStrings = {"demo"};
+
+    private HashMap<String, Command> eventMap = new HashMap<>();
+
+    private SwerveAutoBuilder autoBuilder;
 
     public AutonomousManager(TrajectoryLoader trajectoryLoader, RobotContainer container) {
         this.trajectoryLoader = trajectoryLoader;
@@ -35,6 +47,18 @@ public class AutonomousManager {
 
         // Choose the first auto as the default
         selectedAuto.setString(autoStrings[0]);
+
+        SwerveDriveSubsystem swerveDriveSubsystem = container.getSwerveDriveSubsystem();
+
+        autoBuilder = new SwerveAutoBuilder(
+                swerveDriveSubsystem::getPose,
+                swerveDriveSubsystem::setPose,
+                Constants.SwerveConstants.swerveKinematics,
+                new PIDConstants(5.0, 0.0, 0.0),
+                new PIDConstants(0.5, 0.0, 0.0),
+                swerveDriveSubsystem::setModuleStates,
+                eventMap,
+                swerveDriveSubsystem);
     }
 
     public Command getDemo() {
@@ -66,14 +90,25 @@ public class AutonomousManager {
                 new InstantCommand(() -> container.getSwerveDriveSubsystem().setPose(initialState.poseMeters)));
     }
 
+    private Command getPathGroupCommand(String autoName) {
+        ArrayList<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(autoName, new PathConstraints(4, 3));
+        return new SequentialCommandGroup(
+            new InstantCommand(() -> {container.getSwerveDriveSubsystem().isTakingModuleStatesNotChassisSpeeds = true;}), 
+            autoBuilder.fullAuto(pathGroup),
+            new InstantCommand(() -> {container.getSwerveDriveSubsystem().isTakingModuleStatesNotChassisSpeeds = false;})
+        );
+    }
+
     public Command loadAutonomousCommand() {
         switch (selectedAuto.getString(autoStrings[0])) {
             case "demo":
                 return getDemo();
         }
 
+        return getPathGroupCommand(selectedAuto.getString(autoStrings[0]));
+
         // Return an empty command group if no auto is specified
-        return new SequentialCommandGroup();
+        // return new SequentialCommandGroup();
     }
 
     public Command getAutonomousCommand() {
