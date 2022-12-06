@@ -129,7 +129,7 @@ public class SwerveModule {
         double encoder = Conversions.falconToMPS(
                 driveMotor.getSelectedSensorPosition(),
                 Constants.SwerveConstants.wheelCircumference,
-                Constants.SwerveConstants.driveGearRatio);
+                Constants.SwerveConstants.driveGearRatio) / 10.0;
         Rotation2d angle = Rotation2d.fromDegrees(Conversions.falconToDegrees(
                 angleMotor.getSelectedSensorPosition(), Constants.SwerveConstants.angleGearRatio));
         return new SwerveModulePosition(encoder, angle);

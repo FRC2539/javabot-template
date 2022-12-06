@@ -1,30 +1,25 @@
 package frc.robot.subsystems;
 
-import com.kauailabs.navx.frc.AHRS;
-import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.VecBuilder;
+import com.ctre.phoenix.sensors.Pigeon2;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.control.MovingAverageVelocity;
 import frc.lib.control.SwerveDriveSignal;
-import frc.lib.logging.LoggableDoubleArray;
 import frc.lib.loops.Updatable;
 import frc.lib.swerve.SwerveModule;
 import frc.robot.Constants;
@@ -48,7 +43,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     private final TrajectoryFollower follower =
             new TrajectoryFollower(autoXController, autoYController, autoThetaController);
 
-    private final SwerveDrivePoseEstimator<N7, N7, N5> swervePoseEstimator;
+    // private final SwerveDrivePoseEstimator<N7, N7, N5> swervePoseEstimator;
+    private final SwerveDriveOdometry swervePoseEstimator;
 
     private final MovingAverageVelocity velocityEstimator = new MovingAverageVelocity(20);
 
@@ -58,19 +54,27 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     private SwerveModule[] modules;
 
-    private final AHRS gyro = new AHRS();
+    private final Pigeon2 gyro = new Pigeon2(60);
 
     private NetworkTable table;
     private DoubleArrayPublisher posePublisher;
     private DoubleArrayLogEntry poseLogger = new DoubleArrayLogEntry(DataLogManager.getLog(), "Pose");
 
+    private DoubleArrayPublisher cancoderPublisher;
+
+    private DoublePublisher doublePublisher;
+
     //NOTE: This is a workaround because Pathplanner has not yet released their newest build of their thingy.
     //Should be changed eventually and the code relating to it should be updated.
-    public boolean isTakingModuleStatesNotChassisSpeeds = false;
+    // public boolean isTakingModuleStatesNotChassisSpeeds = false;
 
     public SwerveDriveSubsystem() {
         table = NetworkTableInstance.getDefault().getTable(getName());
         posePublisher = table.getDoubleArrayTopic("Pose").publish();
+
+        cancoderPublisher = table.getDoubleArrayTopic("CANCoders").publish();
+
+        doublePublisher = table.getDoubleTopic("Double").publish();
 
         modules = new SwerveModule[] {
             new SwerveModule(0, Constants.SwerveConstants.Mod0.constants),
@@ -85,25 +89,27 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
         }
 
         // Initialize the swerve drive pose estimator with access to the module positions.
-        swervePoseEstimator = new SwerveDrivePoseEstimator<N7, N7, N5>(
-                Nat.N7(),
-                Nat.N7(),
-                Nat.N5(),
-                new Rotation2d(),
-                getModulePositions(),
-                new Pose2d(),
-                Constants.SwerveConstants.swerveKinematics,
-                VecBuilder.fill(0.01, 0.01, Units.degreesToRadians(0.01), 0.01, 0.01, 0.01, 0.01),
-                VecBuilder.fill(Units.degreesToRadians(0.01), 0.01, 0.01, 0.01, 0.01),
-                VecBuilder.fill(0.025, 0.025, Units.degreesToRadians(0.025)));
+        // swervePoseEstimator = new SwerveDrivePoseEstimator<N7, N7, N5>(
+        //         Nat.N7(),
+        //         Nat.N7(),
+        //         Nat.N5(),
+        //         new Rotation2d(),
+        //         getModulePositions(),
+        //         new Pose2d(),
+        //         Constants.SwerveConstants.swerveKinematics,
+        //         VecBuilder.fill(0.001, 0.001, Units.degreesToRadians(0.001), 0.001, 0.001, 0.001, 0.001),
+        //         VecBuilder.fill(Units.degreesToRadians(0.001), 0.001, 0.001, 0.001, 0.001),
+        //         VecBuilder.fill(0.025, 0.025, Units.degreesToRadians(0.025)));
+
+        swervePoseEstimator = new SwerveDriveOdometry(Constants.SwerveConstants.swerveKinematics, new Rotation2d(), getModulePositions(), pose);
 
         // Flip the initial pose estimate to match the practice pose estimate to the post-auto pose estimate
-        setRotation(Rotation2d.fromDegrees(180));
+        // setRotation(Rotation2d.fromDegrees(180));
     }
 
-    public SwerveDrivePoseEstimator<N7, N7, N5> getPoseEstimator() {
-        return swervePoseEstimator;
-    }
+    // public SwerveDrivePoseEstimator<N7, N7, N5> getPoseEstimator() {
+    //     return swervePoseEstimator;
+    // }
 
     public Pose2d getPose() {
         return pose;
@@ -115,6 +121,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     public ChassisSpeeds getSmoothedVelocity() {
         return velocityEstimator.getAverage();
+    }
+
+    public Rotation2d getGyroRotation() {
+        return Rotation2d.fromDegrees(gyro.getYaw());
     }
 
     public Rotation2d getRotation() {
@@ -135,7 +145,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     public void setPose(Pose2d pose) {
         this.pose = pose;
-        swervePoseEstimator.resetPosition(gyro.getRotation2d(), getModulePositions(), pose);
+        swervePoseEstimator.resetPosition(getGyroRotation(), getModulePositions(), pose);
     }
 
     public void setRotation(Rotation2d angle) {
@@ -172,8 +182,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
         velocityEstimator.add(velocity);
 
-        pose = swervePoseEstimator.updateWithTime(
-                Timer.getFPGATimestamp(), gyro.getRotation2d(), moduleStates, modulePositions);
+        // pose = swervePoseEstimator.updateWithTime(
+        //         Timer.getFPGATimestamp(), gyro.getRotation2d(), moduleStates, modulePositions);
+
+        pose = swervePoseEstimator.update(getGyroRotation(), modulePositions);
     }
 
     public SwerveModuleState[] getModuleStates() {
@@ -220,21 +232,27 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
         }
     }
 
+    public void setModuleStatesProxy(SwerveModuleState[] desiredStates) {
+        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.SwerveConstants.maxSpeed);
+
+        driveSignal = new SwerveDriveSignal(Constants.SwerveConstants.swerveKinematics.toChassisSpeeds(desiredStates), false);
+    }
+
     @Override
     public void update() {
         updateOdometry();
 
-        if (!isTakingModuleStatesNotChassisSpeeds) {
-            updateModules(driveSignal);
-        }
+        updateModules(driveSignal);
     }
 
     @Override
     public void periodic() {
-        double[] poseArray = poseToDoubleArray(pose);
+        // double[] poseArray = poseToDoubleArray(pose);
 
-        LoggableDoubleArray loggablePoseArray = new LoggableDoubleArray(posePublisher, poseLogger, poseArray);
-        loggablePoseArray.logAndPublishPoses(poseArray);
+        // LoggableDoubleArray loggablePoseArray = new LoggableDoubleArray(posePublisher, poseLogger, poseArray);
+        // loggablePoseArray.logAndPublishPoses(poseArray);
+
+        doublePublisher.set(pose.getRotation().getDegrees());
     }
 
     private double[] poseToDoubleArray(Pose2d pose) {

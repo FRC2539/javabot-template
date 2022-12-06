@@ -3,24 +3,22 @@ package frc.robot.util;
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
+import com.pathplanner.lib.server.PathPlannerServer;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
-import frc.robot.commands.FollowTrajectoryCommand;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class AutonomousManager {
-    private TrajectoryLoader trajectoryLoader;
     private RobotContainer container;
 
     private NetworkTable autonomousTable;
@@ -33,8 +31,7 @@ public class AutonomousManager {
 
     private SwerveAutoBuilder autoBuilder;
 
-    public AutonomousManager(TrajectoryLoader trajectoryLoader, RobotContainer container) {
-        this.trajectoryLoader = trajectoryLoader;
+    public AutonomousManager(RobotContainer container) {
         this.container = container;
 
         NetworkTableInstance inst = NetworkTableInstance.getDefault();
@@ -48,6 +45,11 @@ public class AutonomousManager {
         // Choose the first auto as the default
         selectedAuto.setString(autoStrings[0]);
 
+        eventMap.put("print", new PrintCommand("hi"));
+        
+        // TODO
+        // Robot starts thinking it is facing backwards.
+
         SwerveDriveSubsystem swerveDriveSubsystem = container.getSwerveDriveSubsystem();
 
         autoBuilder = new SwerveAutoBuilder(
@@ -56,47 +58,20 @@ public class AutonomousManager {
                 Constants.SwerveConstants.swerveKinematics,
                 new PIDConstants(5.0, 0.0, 0.0),
                 new PIDConstants(0.5, 0.0, 0.0),
-                swerveDriveSubsystem::setModuleStates,
+                swerveDriveSubsystem::setModuleStatesProxy,
                 eventMap,
                 swerveDriveSubsystem);
+
+        PathPlannerServer.startServer(5811);
     }
 
     public Command getDemo() {
-        SequentialCommandGroup command = new SequentialCommandGroup();
-
-        resetRobotPose(command, trajectoryLoader.getThreeBall());
-
-        follow(command, trajectoryLoader.getThreeBall());
-        follow(command, trajectoryLoader.getThreeBall2());
-
-        follow(command, trajectoryLoader.getFiveBall1());
-        follow(command, trajectoryLoader.getFiveBallSweep());
-        follow(command, trajectoryLoader.getFiveBall2());
-
-        return command;
-    }
-
-    private void follow(SequentialCommandGroup command, PathPlannerTrajectory trajectory) {
-        command.addCommands(new FollowTrajectoryCommand(container.getSwerveDriveSubsystem(), trajectory));
-    }
-
-    private void resetRobotPose(SequentialCommandGroup command, PathPlannerTrajectory trajectory) {
-        PathPlannerState initialState = trajectory.getInitialState();
-
-        command.addCommands(new InstantCommand(() -> container
-                .getSwerveDriveSubsystem()
-                .setRotation(initialState.holonomicRotation.times(-1)))); // might need to reverse this angle
-        command.addCommands(
-                new InstantCommand(() -> container.getSwerveDriveSubsystem().setPose(initialState.poseMeters)));
+        return getPathGroupCommand("demo");
     }
 
     private Command getPathGroupCommand(String autoName) {
         ArrayList<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(autoName, new PathConstraints(4, 3));
-        return new SequentialCommandGroup(
-            new InstantCommand(() -> {container.getSwerveDriveSubsystem().isTakingModuleStatesNotChassisSpeeds = true;}), 
-            autoBuilder.fullAuto(pathGroup),
-            new InstantCommand(() -> {container.getSwerveDriveSubsystem().isTakingModuleStatesNotChassisSpeeds = false;})
-        );
+        return autoBuilder.fullAuto(pathGroup);
     }
 
     public Command loadAutonomousCommand() {

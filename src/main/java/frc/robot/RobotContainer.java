@@ -14,7 +14,6 @@ import frc.robot.Constants.TimesliceConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.robot.util.AutonomousManager;
-import frc.robot.util.TrajectoryLoader;
 
 public class RobotContainer {
     private final ThrustmasterJoystick leftDriveController =
@@ -25,13 +24,11 @@ public class RobotContainer {
     private final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
 
     private AutonomousManager autonomousManager;
-    private TrajectoryLoader trajectoryLoader;
     private UpdateManager updateManager;
 
     public RobotContainer(TimesliceRobot robot) {
-        trajectoryLoader = new TrajectoryLoader();
         updateManager = new UpdateManager(robot);
-        autonomousManager = new AutonomousManager(trajectoryLoader, this);
+        autonomousManager = new AutonomousManager(this);
 
         updateManager.schedule(swerveDriveSubsystem, TimesliceConstants.DRIVETRAIN_PERIOD);
 
