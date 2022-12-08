@@ -58,6 +58,7 @@ public class SwerveModule {
                         .angle); // Custom optimize command, since default WPILib optimize assumes continuous controller
         // which CTRE is not
 
+
         if (isOpenLoop) {
             double percentOutput = desiredState.speedMetersPerSecond / Constants.SwerveConstants.maxSpeed;
             driveMotor.set(ControlMode.PercentOutput, percentOutput);
@@ -77,6 +78,7 @@ public class SwerveModule {
                 ? lastAngle
                 : desiredState.angle
                         .getDegrees(); // Prevent rotating module if speed is less then 1%. Prevents Jittering.
+
         angleMotor.set(
                 ControlMode.Position, Conversions.degreesToFalcon(angle, Constants.SwerveConstants.angleGearRatio));
         lastAngle = angle;
@@ -127,9 +129,10 @@ public class SwerveModule {
 
     public SwerveModulePosition getPosition() {
         double encoder = Conversions.falconToMPS(
-                driveMotor.getSelectedSensorPosition(),
-                Constants.SwerveConstants.wheelCircumference,
-                Constants.SwerveConstants.driveGearRatio) / 10.0;
+                        driveMotor.getSelectedSensorPosition(),
+                        Constants.SwerveConstants.wheelCircumference,
+                        Constants.SwerveConstants.driveGearRatio)
+                / 10.0;
         Rotation2d angle = Rotation2d.fromDegrees(Conversions.falconToDegrees(
                 angleMotor.getSelectedSensorPosition(), Constants.SwerveConstants.angleGearRatio));
         return new SwerveModulePosition(encoder, angle);
@@ -141,5 +144,21 @@ public class SwerveModule {
 
     public double getSteerTemperature() {
         return angleMotor.getTemperature();
+    }
+
+    public double getDriveVoltage() {
+        return driveMotor.getMotorOutputVoltage();
+    }
+
+    public double getSteerVoltage() {
+        return angleMotor.getMotorOutputVoltage();
+    }
+
+    public double getDriveCurrent() {
+        return driveMotor.getSupplyCurrent();
+    }
+
+    public double getSteerCurrent() {
+        return angleMotor.getSupplyCurrent();
     }
 }

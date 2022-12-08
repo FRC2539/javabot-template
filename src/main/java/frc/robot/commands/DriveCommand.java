@@ -28,6 +28,6 @@ public class DriveCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        drivetrainSubsystem.drive(new ChassisSpeeds(), true);
+        drivetrainSubsystem.stop();
     }
 }

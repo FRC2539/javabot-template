@@ -18,15 +18,16 @@ public class Robot extends TimesliceRobot {
 
         // Prevents the logging of many errors with our controllers
         DriverStation.silenceJoystickConnectionWarning(true);
-
-        // Begin logging networktables, controller inputs, and more
-        if (isReal()) {
-            DriverStation.startDataLog(DataLogManager.getLog()); // getLog() automatically starts the logging
-        }
     }
 
     @Override
-    public void robotInit() {}
+    public void robotInit() {
+        // Begin logging networktables, controller inputs, and more
+        if (isReal()) {
+            DataLogManager.logNetworkTables(false);
+            // DriverStation.startDataLog(DataLogManager.getLog()); // getLog() automatically starts the logging
+        }
+    }
 
     @Override
     public void robotPeriodic() {

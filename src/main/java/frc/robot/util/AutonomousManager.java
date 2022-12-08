@@ -6,7 +6,6 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.server.PathPlannerServer;
-
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -46,7 +45,7 @@ public class AutonomousManager {
         selectedAuto.setString(autoStrings[0]);
 
         eventMap.put("print", new PrintCommand("hi"));
-        
+
         // TODO
         // Robot starts thinking it is facing backwards.
 
