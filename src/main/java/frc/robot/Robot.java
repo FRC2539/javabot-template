@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimesliceRobot;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.TimesliceConstants;
 
@@ -11,21 +12,23 @@ public class Robot extends TimesliceRobot {
 
     private RobotContainer robotContainer;
 
+    private Command autonomousCommand;
+
     public Robot() {
         super(TimesliceConstants.ROBOT_PERIODIC_ALLOCATION, TimesliceConstants.CONTROLLER_PERIOD);
-
-        robotContainer = new RobotContainer(this);
-
-        // Prevents the logging of many errors with our controllers
-        DriverStation.silenceJoystickConnectionWarning(true);
     }
 
     @Override
     public void robotInit() {
+        robotContainer = new RobotContainer(this);
+
+        // Prevents the logging of many errors with our controllers
+        DriverStation.silenceJoystickConnectionWarning(true);
+
         // Begin logging networktables, controller inputs, and more
         if (isReal()) {
-            DataLogManager.logNetworkTables(false);
-            // DriverStation.startDataLog(DataLogManager.getLog()); // getLog() automatically starts the logging
+            DataLogManager.logNetworkTables(false); // We have a custom implementation for better NT logging
+            DriverStation.startDataLog(DataLogManager.getLog());
         }
     }
 
@@ -36,14 +39,20 @@ public class Robot extends TimesliceRobot {
 
     @Override
     public void autonomousInit() {
-        robotContainer.getAutonomousCommand().schedule();
+        autonomousCommand = robotContainer.getAutonomousCommand();
+
+        // Schedule the chosen autonomous command
+        if (autonomousCommand != null) autonomousCommand.schedule();
     }
 
     @Override
     public void autonomousPeriodic() {}
 
     @Override
-    public void teleopInit() {}
+    public void teleopInit() {
+        // Prevent any autonomous code from overrunning into teleop
+        if (autonomousCommand != null) autonomousCommand.cancel();
+    }
 
     @Override
     public void teleopPeriodic() {}

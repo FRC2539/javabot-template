@@ -1,31 +1,31 @@
 package frc.lib.logging;
 
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.DoubleSubscriber;
-import edu.wpi.first.networktables.DoubleTopic;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.BooleanSubscriber;
+import edu.wpi.first.networktables.BooleanTopic;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 
-public class LoggableDouble {
-    DoubleTopic topic;
-    DoublePublisher publisher;
-    DoubleSubscriber subscriber;
-    DoubleLogEntry logger;
-    double defaultValue;
+public class LoggableBoolean {
+    BooleanTopic topic;
+    BooleanPublisher publisher;
+    BooleanSubscriber subscriber;
+    BooleanLogEntry logger;
+    boolean defaultValue;
 
     /**
      * @param path The full name of the double, e.g. "/MySubsystem/MyThing"
      * @param defaultValue
      */
-    public LoggableDouble(String path, double defaultValue) {
+    public LoggableBoolean(String path, boolean defaultValue) {
         this.defaultValue = defaultValue;
 
-        topic = NetworkTableInstance.getDefault().getDoubleTopic(path);
-        logger = new DoubleLogEntry(DataLogManager.getLog(), path);
+        topic = NetworkTableInstance.getDefault().getBooleanTopic(path);
+        logger = new BooleanLogEntry(DataLogManager.getLog(), path);
     }
 
-    public void set(double value) {
+    public void set(boolean value) {
         // Lazily create a publisher
         if (publisher == null) publisher = topic.publish();
 
@@ -33,7 +33,7 @@ public class LoggableDouble {
         logger.append(value);
     }
 
-    public double get() {
+    public boolean get() {
         // Lazily create a subscriber
         if (subscriber == null) subscriber = topic.subscribe(defaultValue);
 

@@ -1,19 +1,15 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+
 import edu.wpi.first.wpilibj.TimesliceRobot;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.controller.Axis;
 import frc.lib.controller.ThrustmasterJoystick;
 import frc.lib.loops.UpdateManager;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.TimesliceConstants;
-import frc.robot.commands.*;
 import frc.robot.subsystems.*;
-import frc.robot.util.AutonomousManager;
 
 public class RobotContainer {
     private final ThrustmasterJoystick leftDriveController =
@@ -32,8 +28,8 @@ public class RobotContainer {
 
         updateManager.schedule(swerveDriveSubsystem, TimesliceConstants.DRIVETRAIN_PERIOD);
 
-        swerveDriveSubsystem.setDefaultCommand(new DriveCommand(
-                swerveDriveSubsystem, getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
+        swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.getDriveCommand(
+                getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
 
         configureControllerLayout();
     }
@@ -43,12 +39,8 @@ public class RobotContainer {
         leftDriveController.getYAxis().setScale(Constants.SwerveConstants.maxSpeed);
         rightDriveController.getXAxis().setScale(Constants.SwerveConstants.maxAngularVelocity);
 
-        leftDriveController.getLeftTopLeft().onTrue(new InstantCommand(() -> swerveDriveSubsystem.zeroRotation()));
-        leftDriveController
-                .getLeftTopRight()
-                .onTrue(new InstantCommand(() -> swerveDriveSubsystem.setPose(new Pose2d(
-                        new Translation2d(),
-                        swerveDriveSubsystem.getRotation().rotateBy(Rotation2d.fromDegrees(180))))));
+        leftDriveController.getLeftTopLeft().onTrue(runOnce(swerveDriveSubsystem::zeroRotation, swerveDriveSubsystem));
+        leftDriveController.nameLeftTopLeft("Reset Gyro Angle");
 
         rightDriveController.sendButtonNamesToNT();
         leftDriveController.sendButtonNamesToNT();

@@ -1,31 +1,31 @@
 package frc.lib.logging;
 
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.DoubleSubscriber;
-import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.networktables.StringPublisher;
+import edu.wpi.first.networktables.StringSubscriber;
+import edu.wpi.first.networktables.StringTopic;
+import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 
-public class LoggableDouble {
-    DoubleTopic topic;
-    DoublePublisher publisher;
-    DoubleSubscriber subscriber;
-    DoubleLogEntry logger;
-    double defaultValue;
+public class LoggableString {
+    StringTopic topic;
+    StringPublisher publisher;
+    StringSubscriber subscriber;
+    StringLogEntry logger;
+    String defaultValue;
 
     /**
      * @param path The full name of the double, e.g. "/MySubsystem/MyThing"
      * @param defaultValue
      */
-    public LoggableDouble(String path, double defaultValue) {
+    public LoggableString(String path, String defaultValue) {
         this.defaultValue = defaultValue;
 
-        topic = NetworkTableInstance.getDefault().getDoubleTopic(path);
-        logger = new DoubleLogEntry(DataLogManager.getLog(), path);
+        topic = NetworkTableInstance.getDefault().getStringTopic(path);
+        logger = new StringLogEntry(DataLogManager.getLog(), path);
     }
 
-    public void set(double value) {
+    public void set(String value) {
         // Lazily create a publisher
         if (publisher == null) publisher = topic.publish();
 
@@ -33,7 +33,7 @@ public class LoggableDouble {
         logger.append(value);
     }
 
-    public double get() {
+    public String get() {
         // Lazily create a subscriber
         if (subscriber == null) subscriber = topic.subscribe(defaultValue);
 

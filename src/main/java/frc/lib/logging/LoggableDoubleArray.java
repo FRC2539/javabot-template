@@ -16,7 +16,7 @@ public class LoggableDoubleArray {
 
     /**
      * @param path The full name of the array, e.g. "/MySubsystem/MyThing"
-     * @param initialArray
+     * @param defaultValue
      */
     public LoggableDoubleArray(String path, double[] defaultValue) {
         this.defaultValue = defaultValue;

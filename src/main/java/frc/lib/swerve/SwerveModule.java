@@ -52,12 +52,8 @@ public class SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
-        desiredState = CTREModuleState.optimize(
-                desiredState,
-                getState()
-                        .angle); // Custom optimize command, since default WPILib optimize assumes continuous controller
-        // which CTRE is not
-
+        // Custom optimize command, since default WPILib optimize assumes continuous controller, which CTRE is not
+        desiredState = CTREModuleState.optimize(desiredState, getState().angle);
 
         if (isOpenLoop) {
             double percentOutput = desiredState.speedMetersPerSecond / Constants.SwerveConstants.maxSpeed;
@@ -142,7 +138,7 @@ public class SwerveModule {
         return driveMotor.getTemperature();
     }
 
-    public double getSteerTemperature() {
+    public double getAngleTemperature() {
         return angleMotor.getTemperature();
     }
 
@@ -150,7 +146,7 @@ public class SwerveModule {
         return driveMotor.getMotorOutputVoltage();
     }
 
-    public double getSteerVoltage() {
+    public double getAngleVoltage() {
         return angleMotor.getMotorOutputVoltage();
     }
 
@@ -158,7 +154,7 @@ public class SwerveModule {
         return driveMotor.getSupplyCurrent();
     }
 
-    public double getSteerCurrent() {
+    public double getAngleCurrent() {
         return angleMotor.getSupplyCurrent();
     }
 }

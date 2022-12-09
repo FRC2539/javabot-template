@@ -1,4 +1,4 @@
-package frc.robot.util;
+package frc.robot;
 
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
@@ -11,43 +11,28 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
-import frc.robot.Constants;
-import frc.robot.RobotContainer;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class AutonomousManager {
-    private RobotContainer container;
-
     private NetworkTable autonomousTable;
-
     private NetworkTableEntry selectedAuto;
-
     private final String[] autoStrings = {"demo"};
 
     private HashMap<String, Command> eventMap = new HashMap<>();
-
     private SwerveAutoBuilder autoBuilder;
 
+    // Load all autonomous paths
+    ArrayList<PathPlannerTrajectory> demoPath = PathPlanner.loadPathGroup("demo", new PathConstraints(4, 3));
+
     public AutonomousManager(RobotContainer container) {
-        this.container = container;
+        // Allow thd custom driver station to select an auto
+        initializeNetworkTablesValues();
 
-        NetworkTableInstance inst = NetworkTableInstance.getDefault();
-        autonomousTable = inst.getTable("Autonomous");
-
-        // Insert all of the auto options into the network tables
-        autonomousTable.getEntry("autos").setStringArray(autoStrings);
-
-        selectedAuto = autonomousTable.getEntry("selectedAuto");
-
-        // Choose the first auto as the default
-        selectedAuto.setString(autoStrings[0]);
-
+        // Create an event map for use in all autos
         eventMap.put("print", new PrintCommand("hi"));
-
-        // TODO
-        // Robot starts thinking it is facing backwards.
 
         SwerveDriveSubsystem swerveDriveSubsystem = container.getSwerveDriveSubsystem();
 
@@ -61,31 +46,36 @@ public class AutonomousManager {
                 eventMap,
                 swerveDriveSubsystem);
 
+        // Disable at competitions
         PathPlannerServer.startServer(5811);
+
+        // TODO
+        // Robot starts thinking it is facing backwards.
     }
 
-    public Command getDemo() {
-        return getPathGroupCommand("demo");
-    }
-
-    private Command getPathGroupCommand(String autoName) {
-        ArrayList<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(autoName, new PathConstraints(4, 3));
+    private Command getPathGroupCommand(ArrayList<PathPlannerTrajectory> pathGroup) {
         return autoBuilder.fullAuto(pathGroup);
     }
 
-    public Command loadAutonomousCommand() {
+    public Command getAutonomousCommand() {
         switch (selectedAuto.getString(autoStrings[0])) {
             case "demo":
-                return getDemo();
+                return getPathGroupCommand(demoPath);
         }
 
-        return getPathGroupCommand(selectedAuto.getString(autoStrings[0]));
-
         // Return an empty command group if no auto is specified
-        // return new SequentialCommandGroup();
+        return new SequentialCommandGroup();
     }
 
-    public Command getAutonomousCommand() {
-        return loadAutonomousCommand();
+    private void initializeNetworkTablesValues() {
+        autonomousTable = NetworkTableInstance.getDefault().getTable("Autonomous");
+
+        // Insert all of the auto options into the network tables
+        autonomousTable.getEntry("autos").setStringArray(autoStrings);
+
+        selectedAuto = autonomousTable.getEntry("selectedAuto");
+
+        // Choose the first auto as the default
+        selectedAuto.setString(autoStrings[0]);
     }
 }
