@@ -31,10 +31,10 @@ public class RobotContainer {
         swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.getDriveCommand(
                 getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
 
-        configureControllerLayout();
+        configureBindings();
     }
 
-    private void configureControllerLayout() {
+    private void configureBindings() {
         leftDriveController.getXAxis().setScale(Constants.SwerveConstants.maxSpeed);
         leftDriveController.getYAxis().setScale(Constants.SwerveConstants.maxSpeed);
         rightDriveController.getXAxis().setScale(Constants.SwerveConstants.maxAngularVelocity);

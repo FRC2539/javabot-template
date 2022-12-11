@@ -1,6 +1,6 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2023.1.1-beta-5"
+    id "edu.wpi.first.GradleRIO" version "2023.1.1-beta-6"
     id 'com.diffplug.spotless' version '6.11.0'
 }
 
@@ -65,6 +65,8 @@ dependencies {
     nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
+
+    testImplementation 'junit:junit:4.13.1'
 }
 
 // Simulation configuration (e.g. environment variables).
@@ -83,6 +85,11 @@ jar {
 // Configure jar and deploy tasks
 deployArtifact.jarTask = jar
 wpi.java.configureExecutableTasks(jar)
+wpi.java.configureTestTasks(test)
+
+test {
+   useJUnit()
+}
 
 // Configure string concat to always inline compile
 tasks.withType(JavaCompile) {

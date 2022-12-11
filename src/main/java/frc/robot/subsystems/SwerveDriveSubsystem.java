@@ -74,7 +74,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     public CommandBase getDriveCommand(Axis forward, Axis strafe, Axis rotation) {
         return runEnd(
-                        () -> drive(new ChassisSpeeds(forward.get(true), strafe.get(true), rotation.get(true))),
+                        () -> setVelocity(new ChassisSpeeds(forward.get(true), strafe.get(true), rotation.get(true))),
                         this::stop)
                 .withName("Drive");
     }
@@ -112,12 +112,12 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
         setRotation(new Rotation2d());
     }
 
-    public void drive(ChassisSpeeds velocity, boolean isFieldOriented) {
+    public void setVelocity(ChassisSpeeds velocity, boolean isFieldOriented) {
         driveSignal = new SwerveDriveSignal(velocity, isFieldOriented);
     }
 
-    public void drive(ChassisSpeeds velocity) {
-        drive(velocity, false);
+    public void setVelocity(ChassisSpeeds velocity) {
+        setVelocity(velocity, false);
     }
 
     public void stop() {
@@ -168,13 +168,6 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
         for (SwerveModule module : modules) {
             module.setDesiredState(desiredStates[module.moduleNumber], true);
         }
-    }
-
-    public void setModuleStatesProxy(SwerveModuleState[] desiredStates) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.SwerveConstants.maxSpeed);
-
-        driveSignal =
-                new SwerveDriveSignal(Constants.SwerveConstants.swerveKinematics.toChassisSpeeds(desiredStates), false);
     }
 
     @Override

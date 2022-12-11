@@ -39,10 +39,9 @@ public class AutonomousManager {
         autoBuilder = new SwerveAutoBuilder(
                 swerveDriveSubsystem::getPose,
                 swerveDriveSubsystem::setPose,
-                Constants.SwerveConstants.swerveKinematics,
                 new PIDConstants(5.0, 0.0, 0.0),
                 new PIDConstants(0.5, 0.0, 0.0),
-                swerveDriveSubsystem::setModuleStatesProxy,
+                swerveDriveSubsystem::setVelocity,
                 eventMap,
                 swerveDriveSubsystem);
 
