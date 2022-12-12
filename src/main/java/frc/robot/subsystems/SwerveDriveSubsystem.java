@@ -74,7 +74,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     public CommandBase getDriveCommand(Axis forward, Axis strafe, Axis rotation) {
         return runEnd(
-                        () -> setVelocity(new ChassisSpeeds(forward.get(true), strafe.get(true), rotation.get(true))),
+                        () -> setVelocity(new ChassisSpeeds(forward.get(true), strafe.get(true), rotation.get(true)), true),
                         this::stop)
                 .withName("Drive");
     }
