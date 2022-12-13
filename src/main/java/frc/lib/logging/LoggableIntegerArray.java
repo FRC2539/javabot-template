@@ -13,6 +13,7 @@ public class LoggableIntegerArray {
     IntegerArraySubscriber subscriber;
     IntegerArrayLogEntry logger;
     long[] defaultValue;
+    boolean override = Constants.competitionMode;
 
     /**
      * @param path The full name of the array, e.g. "/MySubsystem/MyThing"
@@ -25,11 +26,22 @@ public class LoggableIntegerArray {
         logger = new IntegerArrayLogEntry(DataLogManager.getLog(), path);
     }
 
+    public LoggableIntegerArray(String path, long[] defaultValue, boolean overide) {
+        this.defaultValue = defaultValue;
+
+        topic = NetworkTableInstance.getDefault().getIntegerArrayTopic(path);
+        logger = new IntegerArrayLogEntry(DataLogManager.getLog(), path);
+
+        this.override = override;
+    }
+
     public void set(long[] value) {
         // Lazily create a publisher
         if (publisher == null) publisher = topic.publish();
 
-        publisher.set(value);
+        if (!override) {
+            publisher.set(value);
+        }
         logger.append(value);
     }
 

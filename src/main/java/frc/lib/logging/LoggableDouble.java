@@ -13,6 +13,7 @@ public class LoggableDouble {
     DoubleSubscriber subscriber;
     DoubleLogEntry logger;
     double defaultValue;
+    boolean override = Constants.competitionMode;
 
     /**
      * @param path The full name of the double, e.g. "/MySubsystem/MyThing"
@@ -25,11 +26,22 @@ public class LoggableDouble {
         logger = new DoubleLogEntry(DataLogManager.getLog(), path);
     }
 
+    public LoggableDouble(String path, double defaultValue, boolean override) {
+        this.defaultValue = defaultValue;
+
+        topic = NetworkTableInstance.getDefault().getDoubleTopic(path);
+        logger = new DoubleLogEntry(DataLogManager.getLog(), path);
+        this.override = override;
+    }
+
     public void set(double value) {
         // Lazily create a publisher
         if (publisher == null) publisher = topic.publish();
 
-        publisher.set(value);
+        if (!override) {
+            publisher.set(value);
+        }
+        
         logger.append(value);
     }
 

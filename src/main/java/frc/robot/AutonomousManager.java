@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Constants;
 
 public class AutonomousManager {
     private NetworkTable autonomousTable;
@@ -46,7 +47,12 @@ public class AutonomousManager {
                 swerveDriveSubsystem);
 
         // Disable at competitions
-        PathPlannerServer.startServer(5811);
+        if (Constants.networkTableToggle) {
+            PathPlannerServer.startServer(5811);
+        }
+        else {
+            PathPlannerServer.endServer(5811);
+        }
 
         // TODO
         // Robot starts thinking it is facing backwards.
