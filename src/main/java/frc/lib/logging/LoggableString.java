@@ -6,6 +6,7 @@ import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.networktables.StringTopic;
 import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import frc.robot.Constants;
 
 public class LoggableString {
     StringTopic topic;
@@ -13,7 +14,7 @@ public class LoggableString {
     StringSubscriber subscriber;
     StringLogEntry logger;
     String defaultValue;
-    boolean override = Constants.competitionMode;
+    boolean override = !Constants.competitionMode;
 
     /**
      * @param path The full name of the double, e.g. "/MySubsystem/MyThing"
@@ -39,10 +40,8 @@ public class LoggableString {
         // Lazily create a publisher
         if (publisher == null) publisher = topic.publish();
 
-        if (!override) {
-            publisher.set(value);
-        }
-        
+        if (override) publisher.set(value);
+
         logger.append(value);
     }
 

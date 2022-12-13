@@ -6,6 +6,7 @@ import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import frc.robot.Constants;
 
 public class LoggableDouble {
     DoubleTopic topic;
@@ -13,7 +14,7 @@ public class LoggableDouble {
     DoubleSubscriber subscriber;
     DoubleLogEntry logger;
     double defaultValue;
-    boolean override = Constants.competitionMode;
+    boolean override = !Constants.competitionMode;
 
     /**
      * @param path The full name of the double, e.g. "/MySubsystem/MyThing"
@@ -38,10 +39,8 @@ public class LoggableDouble {
         // Lazily create a publisher
         if (publisher == null) publisher = topic.publish();
 
-        if (!override) {
-            publisher.set(value);
-        }
-        
+        if (override) publisher.set(value);
+
         logger.append(value);
     }
 

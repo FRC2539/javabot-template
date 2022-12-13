@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.control.MovingAverageVelocity;
 import frc.lib.control.SwerveDriveSignal;
 import frc.lib.controller.Axis;
+import frc.lib.logging.LoggableDouble;
 import frc.lib.logging.LoggableDoubleArray;
 import frc.lib.loops.Updatable;
 import frc.lib.swerve.SwerveModule;
@@ -32,7 +33,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     private final Pigeon2 gyro = new Pigeon2(60);
 
-    LoggableDoubleArray poseLogger = new LoggableDoubleArray("/SwerveDriveSubsystem/Pose", new double[] {0, 0, 0});
+    LoggableDouble gyroLogger = new LoggableDouble("/SwerveDriveSubsystem/Gyro", 0);
+    LoggableDoubleArray poseLogger = new LoggableDoubleArray("/SwerveDriveSubsystem/Pose", new double[] {0, 0, 0}, true);
     LoggableDoubleArray velocityLogger =
             new LoggableDoubleArray("/SwerveDriveSubsystem/Velocity", new double[] {0, 0, 0});
     LoggableDoubleArray desiredVelocityLogger =
@@ -63,18 +65,21 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
         // Initialize the swerve drive pose estimator with access to the module positions.
         swervePoseEstimator = new SwerveDrivePoseEstimator(
-                SwerveConstants.swerveKinematics, new Rotation2d(), getModulePositions(), new Pose2d());
+                SwerveConstants.swerveKinematics, getGyroRotation(), getModulePositions(), new Pose2d());
+
+        // Try getGyroRotation.times(-1) here and in every resetPosition call
 
         // swervePoseEstimator = new SwerveDriveOdometry(
         //         Constants.SwerveConstants.swerveKinematics, new Rotation2d(), getModulePositions(), pose);
 
         // Flip the initial pose estimate to match the practice pose estimate to the post-auto pose estimate
-        setRotation(Rotation2d.fromDegrees(180));
+        // setRotation(Rotation2d.fromDegrees(180));
     }
 
     public CommandBase getDriveCommand(Axis forward, Axis strafe, Axis rotation) {
         return runEnd(
-                        () -> setVelocity(new ChassisSpeeds(forward.get(true), strafe.get(true), rotation.get(true)), true),
+                        () -> setVelocity(
+                                new ChassisSpeeds(forward.get(true), strafe.get(true), rotation.get(true)), true),
                         this::stop)
                 .withName("Drive");
     }
@@ -172,6 +177,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     @Override
     public void periodic() {
+        gyroLogger.set(getGyroRotation().getDegrees());
+
         poseLogger.set(
                 new double[] {pose.getX(), pose.getY(), pose.getRotation().getRadians()});
         velocityLogger.set(

@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Constants;
 
 public class AutonomousManager {
     private NetworkTable autonomousTable;
@@ -46,12 +45,9 @@ public class AutonomousManager {
                 eventMap,
                 swerveDriveSubsystem);
 
-        // Disable at competitions
-        if (Constants.networkTableToggle) {
+        // Prevent the server from running at competitions
+        if (!Constants.competitionMode) {
             PathPlannerServer.startServer(5811);
-        }
-        else {
-            PathPlannerServer.endServer(5811);
         }
 
         // TODO

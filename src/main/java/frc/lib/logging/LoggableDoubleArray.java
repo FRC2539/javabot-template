@@ -6,6 +6,7 @@ import edu.wpi.first.networktables.DoubleArrayTopic;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import frc.robot.Constants;
 
 public class LoggableDoubleArray {
     DoubleArrayTopic topic;
@@ -13,7 +14,7 @@ public class LoggableDoubleArray {
     DoubleArraySubscriber subscriber;
     DoubleArrayLogEntry logger;
     double[] defaultValue;
-    boolean override = Constants.competitionMode;
+    boolean override = !Constants.competitionMode;
 
     /**
      * @param path The full name of the array, e.g. "/MySubsystem/MyThing"
@@ -38,10 +39,8 @@ public class LoggableDoubleArray {
         // Lazily create a publisher
         if (publisher == null) publisher = topic.publish();
 
-        if (!override) {
-            publisher.set(value);
-        }
-        
+        if (override) publisher.set(value);
+
         logger.append(value);
     }
 

@@ -6,6 +6,7 @@ import edu.wpi.first.networktables.IntegerArrayTopic;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.IntegerArrayLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import frc.robot.Constants;
 
 public class LoggableIntegerArray {
     IntegerArrayTopic topic;
@@ -13,7 +14,7 @@ public class LoggableIntegerArray {
     IntegerArraySubscriber subscriber;
     IntegerArrayLogEntry logger;
     long[] defaultValue;
-    boolean override = Constants.competitionMode;
+    boolean override = !Constants.competitionMode;
 
     /**
      * @param path The full name of the array, e.g. "/MySubsystem/MyThing"
@@ -26,7 +27,7 @@ public class LoggableIntegerArray {
         logger = new IntegerArrayLogEntry(DataLogManager.getLog(), path);
     }
 
-    public LoggableIntegerArray(String path, long[] defaultValue, boolean overide) {
+    public LoggableIntegerArray(String path, long[] defaultValue, boolean override) {
         this.defaultValue = defaultValue;
 
         topic = NetworkTableInstance.getDefault().getIntegerArrayTopic(path);
@@ -39,9 +40,8 @@ public class LoggableIntegerArray {
         // Lazily create a publisher
         if (publisher == null) publisher = topic.publish();
 
-        if (!override) {
-            publisher.set(value);
-        }
+        if (override) publisher.set(value);
+
         logger.append(value);
     }
 

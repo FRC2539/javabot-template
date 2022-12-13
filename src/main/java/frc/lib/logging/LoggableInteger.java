@@ -6,6 +6,7 @@ import edu.wpi.first.networktables.IntegerTopic;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.IntegerLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import frc.robot.Constants;
 
 public class LoggableInteger {
     IntegerTopic topic;
@@ -13,7 +14,7 @@ public class LoggableInteger {
     IntegerSubscriber subscriber;
     IntegerLogEntry logger;
     long defaultValue;
-    boolean override = Constants.competitionMode;
+    boolean override = !Constants.competitionMode;
 
     /**
      * @param path The full name of the double, e.g. "/MySubsystem/MyThing"
@@ -39,9 +40,8 @@ public class LoggableInteger {
         // Lazily create a publisher
         if (publisher == null) publisher = topic.publish();
 
-        if (!override) {
-            publisher.set(value);
-        }
+        if (override) publisher.set(value);
+
         logger.append(value);
     }
 

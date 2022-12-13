@@ -128,7 +128,7 @@ public class SwerveModule {
                         driveMotor.getSelectedSensorPosition(),
                         Constants.SwerveConstants.wheelCircumference,
                         Constants.SwerveConstants.driveGearRatio)
-                / 10.0;
+                / 10.0; // Compensate for Talon measuring in 100 ms units
         Rotation2d angle = Rotation2d.fromDegrees(Conversions.falconToDegrees(
                 angleMotor.getSelectedSensorPosition(), Constants.SwerveConstants.angleGearRatio));
         return new SwerveModulePosition(encoder, angle);

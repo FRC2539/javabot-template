@@ -6,6 +6,7 @@ import edu.wpi.first.networktables.BooleanTopic;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import frc.robot.Constants;
 
 public class LoggableBoolean {
     BooleanTopic topic;
@@ -13,7 +14,7 @@ public class LoggableBoolean {
     BooleanSubscriber subscriber;
     BooleanLogEntry logger;
     boolean defaultValue;
-    boolean override = Constants.competitionMode;
+    boolean override = !Constants.competitionMode;
 
     /**
      * @param path The full name of the double, e.g. "/MySubsystem/MyThing"
@@ -36,11 +37,9 @@ public class LoggableBoolean {
 
     public void set(boolean value) {
         // Lazily create a publisher
-    if (publisher == null) publisher = topic.publish();
+        if (publisher == null) publisher = topic.publish();
 
-        if (!override) {
-            publisher.set(value);
-        }
+        if (override) publisher.set(value);
 
         logger.append(value);
     }
@@ -48,9 +47,8 @@ public class LoggableBoolean {
     public boolean get() {
         // Lazily create a subscriber
         if (subscriber == null) subscriber = topic.subscribe(defaultValue);
-        
-        var value = subscriber.get();
 
+        var value = subscriber.get();
         logger.append(value);
 
         return value;
