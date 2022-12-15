@@ -1,4 +1,4 @@
-package frc.lib.control;
+package frc.lib.interpolation;
 
 import edu.wpi.first.math.interpolation.Interpolatable;
 import java.util.Optional;

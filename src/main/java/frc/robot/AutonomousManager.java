@@ -1,11 +1,15 @@
 package frc.robot;
 
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.server.PathPlannerServer;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -21,27 +25,32 @@ public class AutonomousManager {
     private NetworkTableEntry selectedAuto;
     private final String[] autoStrings = {"demo"};
 
+    SwerveDriveSubsystem swerveDriveSubsystem;
+
     private HashMap<String, Command> eventMap = new HashMap<>();
     private SwerveAutoBuilder autoBuilder;
 
     // Load all autonomous paths
-    ArrayList<PathPlannerTrajectory> demoPath = PathPlanner.loadPathGroup("demo", new PathConstraints(4, 3));
+    ArrayList<PathPlannerTrajectory> demoPath = PathPlanner.loadPathGroup("demo2", new PathConstraints(2, 3));
 
     public AutonomousManager(RobotContainer container) {
+        swerveDriveSubsystem = container.getSwerveDriveSubsystem();
+
         // Allow thd custom driver station to select an auto
         initializeNetworkTablesValues();
 
         // Create an event map for use in all autos
         eventMap.put("print", new PrintCommand("hi"));
+        eventMap.put("stop", runOnce(swerveDriveSubsystem::stop, swerveDriveSubsystem));
 
         SwerveDriveSubsystem swerveDriveSubsystem = container.getSwerveDriveSubsystem();
 
         autoBuilder = new SwerveAutoBuilder(
                 swerveDriveSubsystem::getPose,
                 swerveDriveSubsystem::setPose,
-                new PIDConstants(5.0, 0.0, 0.0),
-                new PIDConstants(0.5, 0.0, 0.0),
-                swerveDriveSubsystem::setVelocity,
+                new PIDConstants(3.0, 0.0, 0.0), // try decreasing P here
+                new PIDConstants(0.02, 0.0, 0.0),
+                (ChassisSpeeds velocity) -> swerveDriveSubsystem.setVelocity(velocity, false, false),
                 eventMap,
                 swerveDriveSubsystem);
 
@@ -50,12 +59,20 @@ public class AutonomousManager {
             PathPlannerServer.startServer(5811);
         }
 
-        // TODO
-        // Robot starts thinking it is facing backwards.
+        // Temporary Robot Auto Guide
+
+        // Forward is 180 degrees always. 
+        // To make an appropriate angle, make the back of the robot face the angle you want in pathplanner
+        
+        // To make a stop point, add a time duration in the marker page.
+        // Then, add the "stop" event.
     }
 
     private Command getPathGroupCommand(ArrayList<PathPlannerTrajectory> pathGroup) {
-        return autoBuilder.fullAuto(pathGroup);
+        return autoBuilder
+                .fullAuto(pathGroup)
+                .andThen(() -> swerveDriveSubsystem.setRotation(
+                        swerveDriveSubsystem.getRotation().rotateBy(Rotation2d.fromDegrees(180))));
     }
 
     public Command getAutonomousCommand() {

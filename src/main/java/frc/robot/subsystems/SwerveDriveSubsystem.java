@@ -10,12 +10,12 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.control.MovingAverageVelocity;
-import frc.lib.control.SwerveDriveSignal;
 import frc.lib.controller.Axis;
+import frc.lib.interpolation.MovingAverageVelocity;
 import frc.lib.logging.LoggableDouble;
 import frc.lib.logging.LoggableDoubleArray;
 import frc.lib.loops.Updatable;
+import frc.lib.swerve.SwerveDriveSignal;
 import frc.lib.swerve.SwerveModule;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants;
@@ -34,7 +34,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     private final Pigeon2 gyro = new Pigeon2(60);
 
     LoggableDouble gyroLogger = new LoggableDouble("/SwerveDriveSubsystem/Gyro", 0);
-    LoggableDoubleArray poseLogger = new LoggableDoubleArray("/SwerveDriveSubsystem/Pose", new double[] {0, 0, 0}, true);
+    LoggableDoubleArray poseLogger =
+            new LoggableDoubleArray("/SwerveDriveSubsystem/Pose", new double[] {0, 0, 0}, true);
     LoggableDoubleArray velocityLogger =
             new LoggableDoubleArray("/SwerveDriveSubsystem/Velocity", new double[] {0, 0, 0});
     LoggableDoubleArray desiredVelocityLogger =
@@ -117,8 +118,12 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
         setRotation(new Rotation2d());
     }
 
+    public void setVelocity(ChassisSpeeds velocity, boolean isFieldOriented, boolean isOpenLoop) {
+        driveSignal = new SwerveDriveSignal(velocity, isFieldOriented, isOpenLoop);
+    }
+
     public void setVelocity(ChassisSpeeds velocity, boolean isFieldOriented) {
-        driveSignal = new SwerveDriveSignal(velocity, isFieldOriented);
+        setVelocity(velocity, isFieldOriented, true);
     }
 
     public void setVelocity(ChassisSpeeds velocity) {
@@ -157,22 +162,27 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
                     driveSignal.omegaRadiansPerSecond,
                     getRotation());
         } else {
-            chassisVelocity = new ChassisSpeeds(
-                    driveSignal.vxMetersPerSecond, driveSignal.vyMetersPerSecond, driveSignal.omegaRadiansPerSecond);
+            chassisVelocity = (ChassisSpeeds) driveSignal;
         }
 
         SwerveModuleState[] moduleStates =
                 Constants.SwerveConstants.swerveKinematics.toSwerveModuleStates(chassisVelocity);
 
-        setModuleStates(moduleStates);
+        setModuleStates(moduleStates, isDriveSignalStopped(driveSignal) ? true : driveSignal.isOpenLoop());
     }
 
-    private void setModuleStates(SwerveModuleState[] desiredStates) {
+    private void setModuleStates(SwerveModuleState[] desiredStates, boolean isOpenLoop) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.SwerveConstants.maxSpeed);
 
         for (SwerveModule module : modules) {
-            module.setDesiredState(desiredStates[module.moduleNumber], true);
+            module.setDesiredState(desiredStates[module.moduleNumber], isOpenLoop);
         }
+    }
+
+    private boolean isDriveSignalStopped(SwerveDriveSignal driveSignal) {
+        return driveSignal.vxMetersPerSecond == 0
+                && driveSignal.vyMetersPerSecond == 0
+                && driveSignal.omegaRadiansPerSecond == 0;
     }
 
     @Override
