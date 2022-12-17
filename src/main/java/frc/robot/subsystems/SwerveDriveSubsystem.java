@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.Pigeon2;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,19 +20,24 @@ import frc.lib.swerve.SwerveDriveSignal;
 import frc.lib.swerve.SwerveModule;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.Constants.TimesliceConstants;
 
 public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     private final SwerveDrivePoseEstimator swervePoseEstimator;
-    // private final SwerveDriveOdometry swervePoseEstimator;
-    private final MovingAverageVelocity velocityEstimator = new MovingAverageVelocity(20);
 
     private Pose2d pose = new Pose2d();
+    private final MovingAverageVelocity velocityEstimator = new MovingAverageVelocity(20);
     private ChassisSpeeds velocity = new ChassisSpeeds();
     private SwerveDriveSignal driveSignal = new SwerveDriveSignal();
 
     private SwerveModule[] modules;
 
-    private final Pigeon2 gyro = new Pigeon2(60);
+    private final Pigeon2 gyro = new Pigeon2(SwerveConstants.PIGEON_PORT);
+
+    // Create a PID controller and heading tracker for maintaining desired heading
+    private final PIDController headingController = new PIDController(0.3, 0, 0, TimesliceConstants.CONTROLLER_PERIOD);
+    private Rotation2d desiredHeading = null;
+    private SwerveDriveSignal previousDriveSignal = new SwerveDriveSignal();
 
     LoggableDouble gyroLogger = new LoggableDouble("/SwerveDriveSubsystem/Gyro", 0);
     LoggableDoubleArray poseLogger =
@@ -67,14 +73,6 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
         // Initialize the swerve drive pose estimator with access to the module positions.
         swervePoseEstimator = new SwerveDrivePoseEstimator(
                 SwerveConstants.swerveKinematics, getGyroRotation(), getModulePositions(), new Pose2d());
-
-        // Try getGyroRotation.times(-1) here and in every resetPosition call
-
-        // swervePoseEstimator = new SwerveDriveOdometry(
-        //         Constants.SwerveConstants.swerveKinematics, new Rotation2d(), getModulePositions(), pose);
-
-        // Flip the initial pose estimate to match the practice pose estimate to the post-auto pose estimate
-        // setRotation(Rotation2d.fromDegrees(180));
     }
 
     public CommandBase getDriveCommand(Axis forward, Axis strafe, Axis rotation) {
@@ -96,6 +94,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
     public ChassisSpeeds getVelocity() {
         return velocity;
+    }
+
+    public double getVelocityMagnitude() {
+        return Math.sqrt(Math.pow(velocity.vxMetersPerSecond, 2) + Math.pow(velocity.vyMetersPerSecond, 2));
     }
 
     public ChassisSpeeds getSmoothedVelocity() {
@@ -165,10 +167,26 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
             chassisVelocity = (ChassisSpeeds) driveSignal;
         }
 
+        // Store the current heading as desired if we are no longer turning
+        if (driveSignal.omegaRadiansPerSecond == 0 && previousDriveSignal.omegaRadiansPerSecond != 0) {
+            desiredHeading = getGyroRotation();
+        } else if (driveSignal.omegaRadiansPerSecond != 0) {
+            desiredHeading = null;
+        }
+
+        // Use a PID controller to maintain the current heading (as long as we are in teleop)
+        if (desiredHeading != null && driveSignal.isOpenLoop()) {
+            chassisVelocity.omegaRadiansPerSecond =
+                    -headingController.calculate(getGyroRotation().getDegrees(), desiredHeading.getDegrees());
+        }
+
         SwerveModuleState[] moduleStates =
                 Constants.SwerveConstants.swerveKinematics.toSwerveModuleStates(chassisVelocity);
 
         setModuleStates(moduleStates, isDriveSignalStopped(driveSignal) ? true : driveSignal.isOpenLoop());
+
+        // Store the current drive signal for the next loop
+        previousDriveSignal = driveSignal;
     }
 
     private void setModuleStates(SwerveModuleState[] desiredStates, boolean isOpenLoop) {

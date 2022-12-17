@@ -28,6 +28,11 @@ public final class Constants {
         public static final double DRIVETRAIN_PERIOD = 0.0025;
     }
 
+    public static final class LightsConstants {
+        public static final int CANDLE_PORT = 59;
+        public static final int LED_COUNT = 300 + 8;
+    }
+
     public static final class SwerveConstants extends Mk3SwerveConstants {}
 
     public static class Mk4SwerveConstants {
@@ -141,6 +146,8 @@ public final class Constants {
 
     public static class Mk3SwerveConstants {
         // See https://github.com/Team364/BaseFalconSwerve for getting these values.
+
+        public static final int PIGEON_PORT = 60;
 
         public static final double trackWidth = 0.5969;
         public static final double wheelBase = 0.5969;

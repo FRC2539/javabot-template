@@ -61,9 +61,9 @@ public class AutonomousManager {
 
         // Temporary Robot Auto Guide
 
-        // Forward is 180 degrees always. 
+        // Forward is 180 degrees always.
         // To make an appropriate angle, make the back of the robot face the angle you want in pathplanner
-        
+
         // To make a stop point, add a time duration in the marker page.
         // Then, add the "stop" event.
     }
