@@ -4,6 +4,7 @@ import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import edu.wpi.first.wpilibj.TimesliceRobot;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.Axis;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
@@ -11,6 +12,8 @@ import frc.lib.loops.UpdateManager;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.TimesliceConstants;
 import frc.robot.subsystems.*;
+import frc.robot.subsystems.LightsSubsystem.LEDSegment;
+import java.util.function.BooleanSupplier;
 
 public class RobotContainer {
     private final ThrustmasterJoystick leftDriveController =
@@ -41,21 +44,25 @@ public class RobotContainer {
         leftDriveController.getYAxis().setScale(Constants.SwerveConstants.maxSpeed);
         rightDriveController.getXAxis().setScale(Constants.SwerveConstants.maxAngularVelocity);
 
-        lightsSubsystem.setDefaultCommand(lightsSubsystem.resetCommand());
-        swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem
-                .getDriveCommand(getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
+        // Set default commands
+        lightsSubsystem.setDefaultCommand(lightsSubsystem.defaultCommand());
+        swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.getDriveCommand(
+                getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
+
+        new Trigger((BooleanSupplier) (() -> swerveDriveSubsystem.getVelocityMagnitude() > 1.2))
+                .whileTrue(
+                        run(() -> LEDSegment.MainStrip.setBandAnimation(LightsSubsystem.orange, 1.2), lightsSubsystem));
 
         leftDriveController.getLeftTopLeft().onTrue(runOnce(swerveDriveSubsystem::zeroRotation, swerveDriveSubsystem));
         leftDriveController.nameLeftTopLeft("Reset Gyro Angle");
 
         operatorController
                 .getA()
-                .whileTrue(run(() -> lightsSubsystem.setBandAnimation(LightsSubsystem.orange, 0.5), lightsSubsystem));
-        operatorController.getX().whileTrue(run(() -> lightsSubsystem.setRainbowAnimation(0.5), lightsSubsystem));
-        operatorController.getY().whileTrue(lightsSubsystem.resetCommand());
+                .whileTrue(
+                        run(() -> LEDSegment.MainStrip.setBandAnimation(LightsSubsystem.orange, 0.5), lightsSubsystem));
+        operatorController.getX().whileTrue(run(() -> LEDSegment.MainStrip.setRainbowAnimation(0.5), lightsSubsystem));
         operatorController.nameA("Band Animation");
         operatorController.nameX("Rainbow Animation");
-        operatorController.nameY("Reset Animations");
 
         rightDriveController.sendButtonNamesToNT();
         leftDriveController.sendButtonNamesToNT();

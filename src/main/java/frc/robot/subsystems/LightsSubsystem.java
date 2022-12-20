@@ -12,21 +12,15 @@ import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LightsConstants;
 
 public class LightsSubsystem extends SubsystemBase {
-    private final CANdle candle = new CANdle(LightsConstants.CANDLE_PORT);
+    private static final CANdle candle = new CANdle(LightsConstants.CANDLE_PORT);
 
     public static final Color orange = new Color(255, 25, 0);
-
-    private Animation desiredAnimation = null;
-    private Color desiredColor = null;
-
-    private final Animation defaultAnimation =
-            new ColorFlowAnimation(255, 25, 0, 0, 1, LightsConstants.LED_COUNT, Direction.Forward);
+    public static final Color black = new Color(0, 0, 0);
 
     public LightsSubsystem() {
         CANdleConfiguration candleConfiguration = new CANdleConfiguration();
@@ -38,63 +32,24 @@ public class LightsSubsystem extends SubsystemBase {
         candle.configAllSettings(candleConfiguration, 100);
     }
 
-    public void setColor(Color color) {
-        desiredColor = color;
-        desiredAnimation = null;
-    }
-
-    public void setColor(int r, int g, int b) {
-        setColor(new Color(r, g, b));
-    }
-
     public void setBrightness(double percent) {
         candle.configBrightnessScalar(percent, 100);
     }
 
-    public void setFlowAnimation(Color color, double speed) {
-        desiredAnimation = new ColorFlowAnimation(
-                color.red, color.green, color.blue, 0, speed, LightsConstants.LED_COUNT, Direction.Forward);
-    }
-
-    public void setFadeAnimation(Color color, double speed) {
-        desiredAnimation =
-                new SingleFadeAnimation(color.red, color.green, color.blue, 0, speed, LightsConstants.LED_COUNT);
-    }
-
-    public void setBandAnimation(Color color, double speed) {
-        desiredAnimation = new LarsonAnimation(
-                color.red, color.green, color.blue, 0, speed, LightsConstants.LED_COUNT, BounceMode.Front, 3);
-    }
-
-    public void setStrobeAnimation(Color color, double speed) {
-        desiredAnimation = new StrobeAnimation(color.red, color.green, color.blue, 0, speed, LightsConstants.LED_COUNT);
-    }
-
-    public void setRainbowAnimation(double speed) {
-        desiredAnimation = new RainbowAnimation(1, 0.5, LightsConstants.LED_COUNT);
-    }
-
-    public CommandBase resetCommand() {
+    public CommandBase defaultCommand() {
         return runOnce(() -> {
-            desiredAnimation = null;
-            desiredColor = null;
+            LEDSegment.CANdle.clearAnimation();
+            LEDSegment.CANdle.disableLEDs();
+
+            LEDSegment.MainStrip.setFlowAnimation(orange, 1);
         });
     }
 
-    @Override
-    public void periodic() {
-        if (desiredAnimation != null) {
-            candle.animate(desiredAnimation);
-        } else if (desiredColor != null) {
-            candle.clearAnimation(0);
-            setCANdleColor(desiredColor);
-        } else {
-            candle.animate(defaultAnimation);
-        }
-    }
-
-    private void setCANdleColor(Color color) {
-        candle.setLEDs(color.red, color.green, color.blue, 255, 0, LightsConstants.LED_COUNT);
+    public CommandBase clearSegmentCommand(LEDSegment segment) {
+        return runOnce(() -> {
+            segment.clearAnimation();
+            segment.disableLEDs();
+        });
     }
 
     public static class Color {
@@ -106,6 +61,62 @@ public class LightsSubsystem extends SubsystemBase {
             this.red = red;
             this.green = green;
             this.blue = blue;
+        }
+    }
+
+    public static enum LEDSegment {
+        CANdle(0, 8, 0),
+        MainStrip(8, 300, 1);
+
+        public final int startIndex;
+        public final int segmentSize;
+        public final int animationSlot;
+
+        // private enum constructor
+        private LEDSegment(int startIndex, int segmentSize, int animationSlot) {
+            this.startIndex = startIndex;
+            this.segmentSize = segmentSize;
+            this.animationSlot = animationSlot;
+        }
+
+        public void setColor(Color color) {
+            clearAnimation();
+            candle.setLEDs(color.red, color.green, color.blue, 0, startIndex, segmentSize);
+        }
+
+        private void setAnimation(Animation animation) {
+            candle.animate(animation, animationSlot);
+        }
+
+        public void clearAnimation() {
+            candle.clearAnimation(animationSlot);
+        }
+
+        public void disableLEDs() {
+            setColor(black);
+        }
+
+        public void setFlowAnimation(Color color, double speed) {
+            setAnimation(new ColorFlowAnimation(
+                    color.red, color.green, color.blue, 0, speed, segmentSize, Direction.Forward, startIndex));
+        }
+
+        public void setFadeAnimation(Color color, double speed) {
+            setAnimation(
+                    new SingleFadeAnimation(color.red, color.green, color.blue, 0, speed, segmentSize, startIndex));
+        }
+
+        public void setBandAnimation(Color color, double speed) {
+            setAnimation(new LarsonAnimation(
+                    color.red, color.green, color.blue, 0, speed, segmentSize, BounceMode.Front, 3, startIndex));
+        }
+
+        public void setStrobeAnimation(Color color, double speed) {
+            setAnimation(new StrobeAnimation(color.red, color.green, color.blue, 0, speed, segmentSize, startIndex));
+        }
+
+        public void setRainbowAnimation(double speed) {
+            setAnimation(new RainbowAnimation(1, 0.5, segmentSize, false, startIndex));
         }
     }
 }

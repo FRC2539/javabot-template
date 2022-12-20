@@ -30,7 +30,6 @@ public final class Constants {
 
     public static final class LightsConstants {
         public static final int CANDLE_PORT = 59;
-        public static final int LED_COUNT = 300 + 8;
     }
 
     public static final class SwerveConstants extends Mk3SwerveConstants {}
