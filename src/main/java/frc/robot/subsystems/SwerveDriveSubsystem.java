@@ -224,19 +224,6 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
 
         driveTemperatureLogger.set(getDriveTemperatures());
         angleTemperatureLogger.set(getAngleTemperatures());
-
-        driveVoltageLogger.set(new double[] {
-            modules[0].getDriveVoltage(),
-            modules[1].getDriveVoltage(),
-            modules[2].getDriveVoltage(),
-            modules[3].getDriveVoltage()
-        });
-        angleVoltageLogger.set(new double[] {
-            modules[0].getAngleVoltage(),
-            modules[1].getAngleVoltage(),
-            modules[2].getAngleVoltage(),
-            modules[3].getAngleVoltage()
-        });
     }
 
     public SwerveModuleState[] getModuleStates() {

@@ -38,9 +38,6 @@ public class LightsSubsystem extends SubsystemBase {
 
     public CommandBase defaultCommand() {
         return runOnce(() -> {
-            LEDSegment.CANdle.clearAnimation();
-            LEDSegment.CANdle.disableLEDs();
-
             LEDSegment.MainStrip.setFlowAnimation(orange, 1);
         });
     }
