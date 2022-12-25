@@ -1,20 +1,22 @@
 package frc.robot;
 
-import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.server.PathPlannerServer;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 import java.util.ArrayList;
@@ -40,7 +42,6 @@ public class AutonomousManager {
         initializeNetworkTablesValues();
 
         // Create an event map for use in all autos
-        eventMap.put("print", new PrintCommand("hi"));
         eventMap.put("stop", runOnce(swerveDriveSubsystem::stop, swerveDriveSubsystem));
 
         SwerveDriveSubsystem swerveDriveSubsystem = container.getSwerveDriveSubsystem();
@@ -68,21 +69,49 @@ public class AutonomousManager {
         // Then, add the "stop" event.
     }
 
-    private Command getPathGroupCommand(ArrayList<PathPlannerTrajectory> pathGroup) {
-        return autoBuilder
-                .fullAuto(pathGroup)
-                .andThen(() -> swerveDriveSubsystem.setRotation(
-                        swerveDriveSubsystem.getRotation().rotateBy(Rotation2d.fromDegrees(180))));
-    }
-
     public Command getAutonomousCommand() {
         switch (selectedAuto.getString(autoStrings[0])) {
             case "demo":
-                return getPathGroupCommand(demoPath);
+                return pathGroupCommand(demoPath);
         }
 
         // Return an empty command group if no auto is specified
         return new SequentialCommandGroup();
+    }
+
+    private Command pathGroupCommand(ArrayList<PathPlannerTrajectory> pathGroup) {
+        return autoBuilder.fullAuto(pathGroup).andThen(reversePoseCommand());
+    }
+
+    private Command pathFollowCommand(PathPlannerTrajectory path) {
+        return autoBuilder.followPath(path).andThen(reversePoseCommand());
+    }
+
+    private Command reversePoseCommand() {
+        return runOnce(() -> swerveDriveSubsystem.setRotation(
+                swerveDriveSubsystem.getRotation().rotateBy(Rotation2d.fromDegrees(180))));
+    }
+
+    public Command driveToPoseCommand(Pose2d targetPose) {
+        return new ProxyCommand(() -> generateDriveToPoseCommand(targetPose));
+    }
+
+    private Command generateDriveToPoseCommand(Pose2d targetPose) {
+        var initialPose = swerveDriveSubsystem.getPose();
+        var initialRotation = initialPose.getRotation().rotateBy(Rotation2d.fromDegrees(180));
+        var targetRotation = targetPose.getRotation().rotateBy(Rotation2d.fromDegrees(180));
+        var currentVelocityDirection = swerveDriveSubsystem.getVelocityRotation();
+
+        var path = PathPlanner.generatePath(
+                new PathConstraints(2, 3),
+                new PathPoint(
+                        initialPose.getTranslation(),
+                        currentVelocityDirection,
+                        initialRotation,
+                        swerveDriveSubsystem.getVelocityMagnitude()),
+                new PathPoint(targetPose.getTranslation(), targetPose.getRotation(), targetRotation));
+
+        return pathFollowCommand(path);
     }
 
     private void initializeNetworkTablesValues() {

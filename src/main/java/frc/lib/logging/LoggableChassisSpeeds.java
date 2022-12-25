@@ -1,10 +1,10 @@
 package frc.lib.logging;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
 
 public class LoggableChassisSpeeds {
@@ -37,5 +37,4 @@ public class LoggableChassisSpeeds {
         var doubleArray = new double[] {value.vxMetersPerSecond, value.vyMetersPerSecond, value.omegaRadiansPerSecond};
         return doubleArray;
     }
-    
 }

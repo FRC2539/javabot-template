@@ -5,6 +5,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -92,12 +93,20 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
         swervePoseEstimator.resetPosition(getGyroRotation(), getModulePositions(), pose);
     }
 
+    public void addVisionPoseEstimate(Pose2d pose, double timestamp) {
+        swervePoseEstimator.addVisionMeasurement(pose, timestamp);
+    }
+
     public ChassisSpeeds getVelocity() {
         return velocity;
     }
 
     public double getVelocityMagnitude() {
         return Math.sqrt(Math.pow(velocity.vxMetersPerSecond, 2) + Math.pow(velocity.vyMetersPerSecond, 2));
+    }
+
+    public Rotation2d getVelocityRotation() {
+        return (new Translation2d(velocity.vxMetersPerSecond, velocity.vxMetersPerSecond)).getAngle();
     }
 
     public ChassisSpeeds getSmoothedVelocity() {

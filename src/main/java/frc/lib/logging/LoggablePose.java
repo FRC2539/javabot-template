@@ -1,10 +1,10 @@
 package frc.lib.logging;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.Constants;
 
 public class LoggablePose {
@@ -27,15 +27,15 @@ public class LoggablePose {
 
     public void set(Pose2d value) {
         var valueAsArray = toDoubleArray(value);
-        
+
         if (override) publisher.set(valueAsArray);
 
         logger.append(valueAsArray);
     }
 
     private double[] toDoubleArray(Pose2d pose) {
-        var doubleArray = new double[] {pose.getX(), pose.getY(), pose.getRotation().getRadians()};
+        var doubleArray =
+                new double[] {pose.getX(), pose.getY(), pose.getRotation().getRadians()};
         return doubleArray;
     }
-    
 }

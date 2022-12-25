@@ -2,6 +2,8 @@ package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.TimesliceRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -49,13 +51,22 @@ public class RobotContainer {
         swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.getDriveCommand(
                 getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
 
+        // Set non-button triggers
         new Trigger((BooleanSupplier) (() -> swerveDriveSubsystem.getVelocityMagnitude() > 1.2))
                 .whileTrue(
                         run(() -> LEDSegment.MainStrip.setBandAnimation(LightsSubsystem.orange, 1.2), lightsSubsystem));
 
+        // Set left joystick bindings
         leftDriveController.getLeftTopLeft().onTrue(runOnce(swerveDriveSubsystem::zeroRotation, swerveDriveSubsystem));
         leftDriveController.nameLeftTopLeft("Reset Gyro Angle");
 
+        // Set right joystick bindings
+        rightDriveController
+                .getBottomThumb()
+                .whileTrue(autonomousManager.driveToPoseCommand(new Pose2d(0, 0, new Rotation2d())));
+        rightDriveController.nameBottomThumb("Go to Origin");
+
+        // Set operator controller bindings
         operatorController
                 .getA()
                 .whileTrue(
