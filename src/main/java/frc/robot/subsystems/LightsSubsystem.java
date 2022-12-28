@@ -49,18 +49,6 @@ public class LightsSubsystem extends SubsystemBase {
         });
     }
 
-    public static class Color {
-        public int red;
-        public int green;
-        public int blue;
-
-        public Color(int red, int green, int blue) {
-            this.red = red;
-            this.green = green;
-            this.blue = blue;
-        }
-    }
-
     public static enum LEDSegment {
         CANdle(0, 8, 0),
         MainStrip(8, 300, 1);
@@ -114,6 +102,18 @@ public class LightsSubsystem extends SubsystemBase {
 
         public void setRainbowAnimation(double speed) {
             setAnimation(new RainbowAnimation(1, 0.5, segmentSize, false, startIndex));
+        }
+    }
+
+    public static class Color {
+        public int red;
+        public int green;
+        public int blue;
+
+        public Color(int red, int green, int blue) {
+            this.red = red;
+            this.green = green;
+            this.blue = blue;
         }
     }
 }

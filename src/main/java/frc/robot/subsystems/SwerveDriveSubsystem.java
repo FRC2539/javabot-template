@@ -76,10 +76,11 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
                 SwerveConstants.swerveKinematics, getGyroRotation(), getModulePositions(), new Pose2d());
     }
 
-    public CommandBase getDriveCommand(Axis forward, Axis strafe, Axis rotation) {
+    public CommandBase driveCommand(Axis forward, Axis strafe, Axis rotation, boolean isFieldOriented) {
         return runEnd(
                         () -> setVelocity(
-                                new ChassisSpeeds(forward.get(true), strafe.get(true), rotation.get(true)), true),
+                                new ChassisSpeeds(forward.get(true), strafe.get(true), rotation.get(true)),
+                                isFieldOriented),
                         this::stop)
                 .withName("Drive");
     }

@@ -15,7 +15,6 @@ import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.TimesliceConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.LightsSubsystem.LEDSegment;
-import java.util.function.BooleanSupplier;
 
 public class RobotContainer {
     private final ThrustmasterJoystick leftDriveController =
@@ -48,17 +47,22 @@ public class RobotContainer {
 
         // Set default commands
         lightsSubsystem.setDefaultCommand(lightsSubsystem.defaultCommand());
-        swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.getDriveCommand(
-                getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis()));
+        swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.driveCommand(
+                getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis(), true));
 
         // Set non-button triggers
-        new Trigger((BooleanSupplier) (() -> swerveDriveSubsystem.getVelocityMagnitude() > 1.2))
+        new Trigger(() -> swerveDriveSubsystem.getVelocityMagnitude() > 1.2)
                 .whileTrue(
                         run(() -> LEDSegment.MainStrip.setBandAnimation(LightsSubsystem.orange, 1.2), lightsSubsystem));
 
         // Set left joystick bindings
         leftDriveController.getLeftTopLeft().onTrue(runOnce(swerveDriveSubsystem::zeroRotation, swerveDriveSubsystem));
+        leftDriveController
+                .getBottomThumb()
+                .whileTrue(swerveDriveSubsystem.driveCommand(
+                        getDriveForwardAxis(), getDriveStrafeAxis(), getDriveRotationAxis(), false));
         leftDriveController.nameLeftTopLeft("Reset Gyro Angle");
+        leftDriveController.nameBottomThumb("Robot Oriented Drive");
 
         // Set right joystick bindings
         rightDriveController

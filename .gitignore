@@ -160,10 +160,9 @@ bin/
 
 # Simulation GUI and other tools window save file
 *-window.json
-
-*.wpilog
-
 simgui-ds.json
 simgui.json
 
+# Simulation data logging
+*.wpilog
 .DataLogTool
