@@ -1,10 +1,15 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import frc.lib.swerve.SwerveModuleConstants;
+import java.util.List;
 
 public final class Constants {
     public static final boolean competitionMode = false;
@@ -30,6 +35,14 @@ public final class Constants {
 
     public static final class LightsConstants {
         public static final int CANDLE_PORT = 59;
+    }
+
+    public static final class VisionConstants {
+        public static final double fieldLength = Units.inchesToMeters(54.0 * 12.0);
+        public static final double fieldWidth = Units.inchesToMeters(27.0 * 12.0);
+
+        public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT =
+                new AprilTagFieldLayout(List.of(new AprilTag(26, new Pose3d(-0.19, 2.59, -1.09, new Rotation3d()))), fieldLength, fieldWidth);
     }
 
     public static final class SwerveConstants extends Mk3SwerveConstants {}

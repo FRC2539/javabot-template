@@ -92,6 +92,11 @@ public class AutonomousManager {
                 swerveDriveSubsystem.getRotation().rotateBy(Rotation2d.fromDegrees(180))));
     }
 
+    /**
+     * Currently only drives to the correct coordinate, angle is not guaranteed.
+     * @param targetPose
+     * @return A command that will drive to the specified pose
+     */
     public Command driveToPoseCommand(Pose2d targetPose) {
         return new ProxyCommand(() -> generateDriveToPoseCommand(targetPose));
     }
@@ -103,15 +108,18 @@ public class AutonomousManager {
         var currentVelocityDirection = swerveDriveSubsystem.getVelocityRotation();
 
         var path = PathPlanner.generatePath(
-                new PathConstraints(2, 3),
+                new PathConstraints(2.5, 5),
                 new PathPoint(
                         initialPose.getTranslation(),
                         currentVelocityDirection,
                         initialRotation,
                         swerveDriveSubsystem.getVelocityMagnitude()),
-                new PathPoint(targetPose.getTranslation(), targetPose.getRotation(), targetRotation));
+                new PathPoint(
+                        targetPose.getTranslation(),
+                        targetRotation,
+                        targetPose.getRotation().rotateBy(Rotation2d.fromDegrees(180))));
 
-        return pathFollowCommand(path);
+        return pathFollowCommand(path).andThen(reversePoseCommand());
     }
 
     private void initializeNetworkTablesValues() {
