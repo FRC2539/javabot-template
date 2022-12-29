@@ -14,19 +14,13 @@ public class LoggableIntegerArray {
     IntegerArraySubscriber subscriber;
     IntegerArrayLogEntry logger;
     long[] defaultValue;
-    boolean override = !Constants.competitionMode;
+    boolean override;
 
     /**
      * @param path The full name of the array, e.g. "/MySubsystem/MyThing"
      * @param defaultValue
+     * @param override
      */
-    public LoggableIntegerArray(String path, long[] defaultValue) {
-        this.defaultValue = defaultValue;
-
-        topic = NetworkTableInstance.getDefault().getIntegerArrayTopic(path);
-        logger = new IntegerArrayLogEntry(DataLogManager.getLog(), path);
-    }
-
     public LoggableIntegerArray(String path, long[] defaultValue, boolean override) {
         this.defaultValue = defaultValue;
 
@@ -34,6 +28,18 @@ public class LoggableIntegerArray {
         logger = new IntegerArrayLogEntry(DataLogManager.getLog(), path);
 
         this.override = override;
+    }
+    
+    public LoggableIntegerArray(String path, long[] defaultValue) {
+        this(path, defaultValue, !Constants.competitionMode);
+    }
+
+    public LoggableIntegerArray(String path, boolean override) {
+        this(path, new long[] {}, override);
+    }
+
+    public LoggableIntegerArray(String path) {
+        this(path, new long[] {}, !Constants.competitionMode);
     }
 
     public void set(long[] value) {

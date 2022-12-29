@@ -18,21 +18,28 @@ public class LoggableDoubleArray {
 
     /**
      * @param path The full name of the array, e.g. "/MySubsystem/MyThing"
+     * @param override
      * @param defaultValue
      */
-    public LoggableDoubleArray(String path, double[] defaultValue) {
-        this.defaultValue = defaultValue;
 
-        topic = NetworkTableInstance.getDefault().getDoubleArrayTopic(path);
-        logger = new DoubleArrayLogEntry(DataLogManager.getLog(), path);
-    }
-
-    public LoggableDoubleArray(String path, double[] defaultValue, boolean override) {
+    public LoggableDoubleArray(String path, boolean override, double[] defaultValue) {
         this.defaultValue = defaultValue;
 
         topic = NetworkTableInstance.getDefault().getDoubleArrayTopic(path);
         logger = new DoubleArrayLogEntry(DataLogManager.getLog(), path);
         this.override = override;
+    } 
+
+    public LoggableDoubleArray(String path, double[] defaultValue) {
+        this(path, !Constants.competitionMode, defaultValue);
+    }
+
+    public LoggableDoubleArray(String path, boolean override) {
+        this(path, override, new double[] {});
+    }
+    
+    public LoggableDoubleArray(String path) {
+        this(path, !Constants.competitionMode, new double[] {});
     }
 
     public void set(double[] value) {

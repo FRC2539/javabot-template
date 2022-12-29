@@ -14,19 +14,13 @@ public class LoggableInteger {
     IntegerSubscriber subscriber;
     IntegerLogEntry logger;
     long defaultValue;
-    boolean override = !Constants.competitionMode;
+    boolean override;
 
     /**
      * @param path The full name of the double, e.g. "/MySubsystem/MyThing"
      * @param defaultValue
+     * @param override
      */
-    public LoggableInteger(String path, long defaultValue) {
-        this.defaultValue = defaultValue;
-
-        topic = NetworkTableInstance.getDefault().getIntegerTopic(path);
-        logger = new IntegerLogEntry(DataLogManager.getLog(), path);
-    }
-
     public LoggableInteger(String path, long defaultValue, boolean override) {
         this.defaultValue = defaultValue;
 
@@ -34,6 +28,18 @@ public class LoggableInteger {
         logger = new IntegerLogEntry(DataLogManager.getLog(), path);
 
         this.override = override;
+    }
+    
+    public LoggableInteger(String path, long defaultValue) {
+        this(path, defaultValue, !Constants.competitionMode);
+    }
+
+    public LoggableInteger(String path, boolean override) {
+        this(path, 0, override);
+    }
+
+    public LoggableInteger(String path) {
+        this(path, 0, !Constants.competitionMode);
     }
 
     public void set(long value) {

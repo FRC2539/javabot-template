@@ -14,19 +14,14 @@ public class LoggableStringArray {
     StringArraySubscriber subscriber;
     StringArrayLogEntry logger;
     String[] defaultValue;
-    boolean override = !Constants.competitionMode;
+    boolean override;
 
     /**
      * @param path The full name of the double, e.g. "/MySubsystem/MyThing"
      * @param defaultValue
+     * @param override
      */
-    public LoggableStringArray(String path, String[] defaultValue) {
-        this.defaultValue = defaultValue;
-
-        topic = NetworkTableInstance.getDefault().getStringArrayTopic(path);
-        logger = new StringArrayLogEntry(DataLogManager.getLog(), path);
-    }
-
+    
     public LoggableStringArray(String path, String[] defaultValue, boolean override) {
         this.defaultValue = defaultValue;
 
@@ -34,6 +29,18 @@ public class LoggableStringArray {
         logger = new StringArrayLogEntry(DataLogManager.getLog(), path);
 
         this.override = override;
+    }
+    
+    public LoggableStringArray(String path, String[] defaultValue) {
+        this(path, defaultValue, !Constants.competitionMode);
+    }
+
+    public LoggableStringArray(String path, boolean override) {
+        this(path, new String[] {}, override);
+    }
+
+    public LoggableStringArray(String path) {
+        this(path, new String[] {}, !Constants.competitionMode);
     }
 
     public void set(String[] value) {

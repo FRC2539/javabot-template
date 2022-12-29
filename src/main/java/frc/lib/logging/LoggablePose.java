@@ -11,18 +11,31 @@ public class LoggablePose {
     DoubleArrayPublisher publisher;
     DoubleArrayLogEntry logger;
     LoggableDoubleArray defaultValue;
-    boolean override = !Constants.competitionMode;
+    boolean override;
 
-    public LoggablePose(String path, Pose2d defaultValue) {
+    /**
+     * @param path The full name of the array, e.g. "/MySubsystem/MyThing"
+     * @param defaultValue
+     * @param override
+     */
+    public LoggablePose(String path, Pose2d defaultValue, boolean override) {
         this.defaultValue = new LoggableDoubleArray(path, toDoubleArray(defaultValue));
 
         publisher = NetworkTableInstance.getDefault().getDoubleArrayTopic(path).publish();
         logger = new DoubleArrayLogEntry(DataLogManager.getLog(), path);
+        this.override = override;
     }
 
-    public LoggablePose(String path, Pose2d defaultValue, boolean override) {
-        this(path, defaultValue);
-        this.override = override;
+    public LoggablePose(String path, Pose2d defaultValue) {
+        this(path, defaultValue, !Constants.competitionMode);
+    }
+
+    public LoggablePose(String path, boolean override) {
+        this(path, new Pose2d(), override);
+    }
+
+    public LoggablePose(String path) {
+        this(path, new Pose2d(), !Constants.competitionMode);
     }
 
     public void set(Pose2d value) {

@@ -14,25 +14,28 @@ public class LoggableBoolean {
     BooleanSubscriber subscriber;
     BooleanLogEntry logger;
     boolean defaultValue;
-    boolean override = !Constants.competitionMode;
+    boolean override;
 
     /**
      * @param path The full name of the double, e.g. "/MySubsystem/MyThing"
      * @param defaultValue
+     * @param override
      */
-    public LoggableBoolean(String path, boolean defaultValue) {
-        this.defaultValue = defaultValue;
-
-        topic = NetworkTableInstance.getDefault().getBooleanTopic(path);
-        logger = new BooleanLogEntry(DataLogManager.getLog(), path);
-    }
-
+    
     public LoggableBoolean(String path, boolean defaultValue, boolean override) {
         this.defaultValue = defaultValue;
 
         topic = NetworkTableInstance.getDefault().getBooleanTopic(path);
         logger = new BooleanLogEntry(DataLogManager.getLog(), path);
         this.override = override;
+    }
+
+    public LoggableBoolean(String path, boolean override) {
+        this(path, false, override);
+    }
+
+    public LoggableBoolean(String path) {
+        this(path, false, !Constants.competitionMode);
     }
 
     public void set(boolean value) {
