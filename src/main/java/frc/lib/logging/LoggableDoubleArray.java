@@ -14,7 +14,7 @@ public class LoggableDoubleArray {
     DoubleArraySubscriber subscriber;
     DoubleArrayLogEntry logger;
     double[] defaultValue;
-    boolean override = !Constants.competitionMode;
+    boolean override;
 
     /**
      * @param path The full name of the array, e.g. "/MySubsystem/MyThing"
