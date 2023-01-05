@@ -8,7 +8,6 @@ public class SwerveModuleConstants {
     public final int cancoderID;
     public final double angleOffset;
     public Optional<String> canivoreName = Optional.empty();
-    public boolean inverted = false;
 
     /**
      * Swerve Module Constants to be used when creating swerve modules.
@@ -28,16 +27,5 @@ public class SwerveModuleConstants {
             int driveMotorID, int angleMotorID, int canCoderID, double angleOffset, String canivoreName) {
         this(driveMotorID, angleMotorID, canCoderID, angleOffset);
         this.canivoreName = Optional.of(canivoreName);
-    }
-
-    public SwerveModuleConstants(
-            int driveMotorID,
-            int angleMotorID,
-            int canCoderID,
-            double angleOffset,
-            String canivoreName,
-            boolean inverted) {
-        this(driveMotorID, angleMotorID, canCoderID, angleOffset, canivoreName);
-        this.inverted = inverted;
     }
 }

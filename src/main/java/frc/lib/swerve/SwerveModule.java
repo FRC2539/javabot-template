@@ -19,7 +19,6 @@ public class SwerveModule {
     private WPI_TalonFX driveMotor;
     private WPI_CANCoder angleEncoder;
     private double lastAngle;
-    private boolean inverted;
 
     SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(
             Constants.SwerveConstants.driveKS, Constants.SwerveConstants.driveKV, Constants.SwerveConstants.driveKA);
@@ -27,8 +26,6 @@ public class SwerveModule {
     public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants) {
         this.moduleNumber = moduleNumber;
         angleOffset = moduleConstants.angleOffset;
-
-        inverted = moduleConstants.inverted;
 
         /* Angle Encoder Config */
         angleEncoder = moduleConstants.canivoreName.isEmpty()
@@ -106,7 +103,7 @@ public class SwerveModule {
         driveMotor.setNeutralMode(Constants.SwerveConstants.driveNeutralMode);
         driveMotor.setSelectedSensorPosition(0);
         driveMotor.enableVoltageCompensation(true);
-        driveMotor.setInverted(inverted);
+        driveMotor.setInverted(Constants.SwerveConstants.driveMotorInvert);
     }
 
     public Rotation2d getCanCoder() {
