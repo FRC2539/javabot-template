@@ -28,7 +28,7 @@ public class LoggableDouble {
         logger = new DoubleLogEntry(DataLogManager.getLog(), path);
         this.override = override;
     }
-    
+
     public LoggableDouble(String path, double defaultValue) {
         this(path, defaultValue, !Constants.competitionMode);
     }

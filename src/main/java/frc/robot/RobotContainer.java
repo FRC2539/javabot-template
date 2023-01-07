@@ -26,7 +26,7 @@ public class RobotContainer {
 
     private final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
     private final LightsSubsystem lightsSubsystem = new LightsSubsystem();
-    private final VisionSubsystem visionSubsystem = new VisionSubsystem();
+    // private final VisionSubsystem visionSubsystem = new VisionSubsystem();
 
     private AutonomousManager autonomousManager;
     private UpdateManager updateManager;
@@ -37,7 +37,7 @@ public class RobotContainer {
 
         updateManager.schedule(swerveDriveSubsystem, TimesliceConstants.DRIVETRAIN_PERIOD);
         updateManager.schedule(lightsSubsystem);
-        updateManager.schedule(visionSubsystem);
+        // updateManager.schedule(visionSubsystem);
 
         configureBindings();
     }
@@ -56,9 +56,10 @@ public class RobotContainer {
         new Trigger(() -> swerveDriveSubsystem.getVelocityMagnitude() > 1.2)
                 .whileTrue(
                         run(() -> LEDSegment.MainStrip.setBandAnimation(LightsSubsystem.orange, 1.2), lightsSubsystem));
-                    
+
         // new Trigger(visionSubsystem::hasTarget).whileTrue(run(() -> {
-        //     swerveDriveSubsystem.addVisionPoseEstimate(visionSubsystem.getPoseEstimate(), visionSubsystem.getTimestamp());
+        //     swerveDriveSubsystem.addVisionPoseEstimate(visionSubsystem.getPoseEstimate(),
+        // visionSubsystem.getTimestamp());
         // }));
 
         // Set left joystick bindings
@@ -118,7 +119,7 @@ public class RobotContainer {
         return lightsSubsystem;
     }
 
-    public VisionSubsystem getVisionSubsystem() {
-        return visionSubsystem;
-    }
+    // public VisionSubsystem getVisionSubsystem() {
+    //     return visionSubsystem;
+    // }
 }

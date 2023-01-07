@@ -21,14 +21,13 @@ public class LoggableDoubleArray {
      * @param override
      * @param defaultValue
      */
-
     public LoggableDoubleArray(String path, boolean override, double[] defaultValue) {
         this.defaultValue = defaultValue;
 
         topic = NetworkTableInstance.getDefault().getDoubleArrayTopic(path);
         logger = new DoubleArrayLogEntry(DataLogManager.getLog(), path);
         this.override = override;
-    } 
+    }
 
     public LoggableDoubleArray(String path, double[] defaultValue) {
         this(path, !Constants.competitionMode, defaultValue);
@@ -37,7 +36,7 @@ public class LoggableDoubleArray {
     public LoggableDoubleArray(String path, boolean override) {
         this(path, override, new double[] {});
     }
-    
+
     public LoggableDoubleArray(String path) {
         this(path, !Constants.competitionMode, new double[] {});
     }

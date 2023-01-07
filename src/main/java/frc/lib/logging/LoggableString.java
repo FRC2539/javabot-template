@@ -30,7 +30,7 @@ public class LoggableString {
         this.override = override;
     }
 
-     public LoggableString(String path, String defaultValue) {
+    public LoggableString(String path, String defaultValue) {
         this(path, defaultValue, !Constants.competitionMode);
     }
 

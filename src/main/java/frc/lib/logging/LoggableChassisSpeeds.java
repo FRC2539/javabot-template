@@ -25,7 +25,7 @@ public class LoggableChassisSpeeds {
         logger = new DoubleArrayLogEntry(DataLogManager.getLog(), path);
         this.override = override;
     }
-    
+
     public LoggableChassisSpeeds(String path, ChassisSpeeds defaultValue) {
         this(path, defaultValue, !Constants.competitionMode);
     }

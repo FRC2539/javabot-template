@@ -43,22 +43,14 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Updatable {
     private SwerveDriveSignal previousDriveSignal = new SwerveDriveSignal();
 
     LoggableDouble gyroLogger = new LoggableDouble("/SwerveDriveSubsystem/Gyro");
-    LoggablePose poseLogger =
-            new LoggablePose("/SwerveDriveSubsystem/Pose", pose, true);
-    LoggableChassisSpeeds velocityLogger =
-            new LoggableChassisSpeeds("/SwerveDriveSubsystem/Velocity");
-    LoggableDoubleArray desiredVelocityLogger =
-            new LoggableDoubleArray("/SwerveDriveSubsystem/Desired Velocity");
-    LoggableDoubleArray wheelAnglesLogger =
-            new LoggableDoubleArray("/SwerveDriveSubsystem/Wheel Angles");
-    LoggableDoubleArray driveTemperatureLogger =
-            new LoggableDoubleArray("/SwerveDriveSubsystem/Drive Temperatures");
-    LoggableDoubleArray angleTemperatureLogger =
-            new LoggableDoubleArray("/SwerveDriveSubsystem/Angle Temperatures");
-    LoggableDoubleArray driveVoltageLogger =
-            new LoggableDoubleArray("/SwerveDriveSubsystem/Drive Voltage");
-    LoggableDoubleArray angleVoltageLogger =
-            new LoggableDoubleArray("/SwerveDriveSubsystem/Angle Voltage");
+    LoggablePose poseLogger = new LoggablePose("/SwerveDriveSubsystem/Pose", pose, true);
+    LoggableChassisSpeeds velocityLogger = new LoggableChassisSpeeds("/SwerveDriveSubsystem/Velocity");
+    LoggableDoubleArray desiredVelocityLogger = new LoggableDoubleArray("/SwerveDriveSubsystem/Desired Velocity");
+    LoggableDoubleArray wheelAnglesLogger = new LoggableDoubleArray("/SwerveDriveSubsystem/Wheel Angles");
+    LoggableDoubleArray driveTemperatureLogger = new LoggableDoubleArray("/SwerveDriveSubsystem/Drive Temperatures");
+    LoggableDoubleArray angleTemperatureLogger = new LoggableDoubleArray("/SwerveDriveSubsystem/Angle Temperatures");
+    LoggableDoubleArray driveVoltageLogger = new LoggableDoubleArray("/SwerveDriveSubsystem/Drive Voltage");
+    LoggableDoubleArray angleVoltageLogger = new LoggableDoubleArray("/SwerveDriveSubsystem/Angle Voltage");
 
     public SwerveDriveSubsystem() {
         modules = new SwerveModule[] {

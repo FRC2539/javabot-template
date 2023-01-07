@@ -29,7 +29,7 @@ public class LoggableInteger {
 
         this.override = override;
     }
-    
+
     public LoggableInteger(String path, long defaultValue) {
         this(path, defaultValue, !Constants.competitionMode);
     }

@@ -21,7 +21,6 @@ public class LoggableBoolean {
      * @param defaultValue
      * @param override
      */
-    
     public LoggableBoolean(String path, boolean defaultValue, boolean override) {
         this.defaultValue = defaultValue;
 

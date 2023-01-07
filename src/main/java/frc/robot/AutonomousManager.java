@@ -19,8 +19,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.SwerveDriveSubsystem;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class AutonomousManager {
     private NetworkTable autonomousTable;
@@ -33,7 +33,7 @@ public class AutonomousManager {
     private SwerveAutoBuilder autoBuilder;
 
     // Load all autonomous paths
-    ArrayList<PathPlannerTrajectory> demoPath = PathPlanner.loadPathGroup("demo2", new PathConstraints(2, 3));
+    List<PathPlannerTrajectory> demoPath = PathPlanner.loadPathGroup("demo2", new PathConstraints(2, 3));
 
     public AutonomousManager(RobotContainer container) {
         swerveDriveSubsystem = container.getSwerveDriveSubsystem();
@@ -79,7 +79,7 @@ public class AutonomousManager {
         return new SequentialCommandGroup();
     }
 
-    private Command pathGroupCommand(ArrayList<PathPlannerTrajectory> pathGroup) {
+    private Command pathGroupCommand(List<PathPlannerTrajectory> pathGroup) {
         return autoBuilder.fullAuto(pathGroup).andThen(reversePoseCommand());
     }
 

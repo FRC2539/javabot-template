@@ -29,7 +29,7 @@ public class LoggableIntegerArray {
 
         this.override = override;
     }
-    
+
     public LoggableIntegerArray(String path, long[] defaultValue) {
         this(path, defaultValue, !Constants.competitionMode);
     }

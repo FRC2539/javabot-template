@@ -21,7 +21,6 @@ public class LoggableStringArray {
      * @param defaultValue
      * @param override
      */
-    
     public LoggableStringArray(String path, String[] defaultValue, boolean override) {
         this.defaultValue = defaultValue;
 
@@ -30,7 +29,7 @@ public class LoggableStringArray {
 
         this.override = override;
     }
-    
+
     public LoggableStringArray(String path, String[] defaultValue) {
         this(path, defaultValue, !Constants.competitionMode);
     }

@@ -41,8 +41,8 @@ public final class Constants {
         public static final double fieldLength = Units.inchesToMeters(54.0 * 12.0);
         public static final double fieldWidth = Units.inchesToMeters(27.0 * 12.0);
 
-        public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT =
-                new AprilTagFieldLayout(List.of(new AprilTag(26, new Pose3d(-0.19, 2.59, -1.09, new Rotation3d()))), fieldLength, fieldWidth);
+        public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = new AprilTagFieldLayout(
+                List.of(new AprilTag(26, new Pose3d(-0.19, 2.59, -1.09, new Rotation3d()))), fieldLength, fieldWidth);
     }
 
     public static final class SwerveConstants extends Mk3SwerveConstants {}
